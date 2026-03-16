@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Créateur d'affiches Médiathèque A3</title>
+  <style>
+    body{font-family:"Helvetica Neue",Arial,sans-serif;background:#f4f4f4;margin:0;padding:24px;}
+    .container{max-width:980px;margin:0 auto;background:#fff;border-radius:12px;padding:18px 18px 22px;box-shadow:0 6px 24px rgba(0,0,0,.12);}
+    h1{margin:0 0 12px;font-size:20px;}
+
+    .tabs{display:flex;gap:8px;margin:6px 0 14px;flex-wrap:wrap;}
+    .tab-btn{border:1px solid #e1e1e1;border-radius:999px;padding:8px 12px;background:#fafafa;font-weight:800;cursor:pointer;font-size:13px;}
+    .tab-btn.active{background:#111;color:#fff;border-color:#111;}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+
+    .card{border:1px solid #e1e1e1;border-radius:12px;padding:12px;background:#fafafa;}
+    label{display:block;font-weight:800;margin:12px 0 6px;}
+    input[type="text"], textarea, select{
+      width:100%;box-sizing:border-box;border:1px solid #d6d6d6;border-radius:10px;padding:10px 12px;font-size:14px;outline:none;background:#fff;
+    }
+    textarea{min-height:92px;resize:vertical;white-space:pre-wrap;}
+    select{padding:10px 12px;}
+    .hint{font-size:12px;color:#555;margin-top:4px;}
+    .actions{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;}
+    button{border:0;border-radius:10px;padding:10px 12px;font-size:14px;font-weight:900;cursor:pointer;}
+    button.primary{background:#0b63ce;color:#fff;}
+    button.secondary{background:#e9edf5;color:#1b1b1b;}
+    button.danger{background:#f3d3d3;color:#7b0d0d;}
+    button:disabled{opacity:.6;cursor:not-allowed;}
+    .status{margin-top:10px;font-size:13px;color:#333;}
+    .small{font-size:12px;color:#555;}
+
+    /* Config */
+    .config-header{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;user-select:none;}
+    .toggle-arrow{font-size:18px;font-weight:900;width:24px;text-align:center;}
+    .config-body.hidden{display:none;}
+    .config-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;}
+    @media (max-width: 900px){ .config-grid{grid-template-columns:1fr;} }
+    .config-item{border:1px solid #e1e1e1;border-radius:12px;background:#fff;padding:10px;}
+    .config-item label{margin:0 0 6px;}
+    .config-status{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:900;font-size:12px;margin-top:8px;}
+    .config-status.ok{background:#d6f5d6;color:#1e6b1e;}
+    .config-status.missing{background:#ffe1e1;color:#8f1a1a;}
+    .font-preview{margin-top:10px;padding:10px;background:#fafafa;border-radius:10px;border:1px solid #eee;}
+    .sample-title{margin:0 0 6px;font-size:16px;font-weight:900;}
+    .sample-text{margin:0;font-size:13px;font-weight:700;}
+    .usage-hint{font-size:12px;color:#666;margin-top:6px;}
+
+    /* Historique compact */
+    .history-list{margin-top:10px;border:1px solid #e1e1e1;border-radius:12px;overflow:hidden;background:#fff;}
+    .history-row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-bottom:1px solid #eee;font-size:12.5px;line-height:1.2;}
+    .history-row:last-child{border-bottom:none;}
+    .history-main{flex:1;min-width:0;}
+    .history-title{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .history-meta{margin-top:2px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .history-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;}
+    .chip{
+      display:inline-block;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;
+      border:1px solid #e1e1e1;background:#fafafa;cursor:pointer;text-decoration:none;color:#111;
+    }
+    .chip.primary{background:#0b63ce;border-color:#0b63ce;color:#fff;}
+    .chip.danger{background:#f3d3d3;border-color:#f3d3d3;color:#7b0d0d;}
+
+    /* Section contact */
+    .inline-toggle{display:flex;align-items:center;gap:10px;margin-top:8px;}
+    .inline-toggle input{width:auto;}
+    .two-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    @media (max-width: 900px){ .two-cols{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Créateur d'affiches Médiathèque A3</h1>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="tabEditor" type="button">Rédaction</button>
+      <button class="tab-btn" data-tab="tabHistory" type="button">Historique</button>
+      <button class="tab-btn" data-tab="tabConfig" type="button">Logos &amp; polices</button>
+    </div>
+
+    <!-- TAB 1: Rédaction -->
+    <div id="tabEditor" class="tab-panel active">
+      <div class="card">
+        <strong>Contenu</strong>
+
+        <!-- Ordre demandé -->
+        <label for="mainImage">Image principale (fond)</label>
+        <input id="mainImage" type="file" accept="image/*" />
+
+        <label for="title">Titre (ligne 1)</label>
+        <input id="title" type="text" value="" />
+
+        <label for="titleLine2">Titre (ligne 2) (optionnel)</label>
+        <input id="titleLine2" type="text" value="" />
+
+        <label for="subtitle">Accroche</label>
+        <textarea id="subtitle"></textarea>
+
+        <label for="dates">Dates</label>
+        <textarea id="dates"></textarea>
+
+        <label for="infos">Infos pratiques</label>
+        <textarea id="infos"></textarea>
+        <div class="hint">La dernière ligne sera extraite automatiquement dans le champ ci-dessous (si vide).</div>
+
+        <div class="inline-toggle">
+          <input id="showContactLine" type="checkbox" checked />
+          <label for="showContactLine" style="margin:0;">Afficher la ligne Médiathèque + téléphone</label>
+        </div>
+
+        <div class="two-cols" style="margin-top:8px;">
+          <div>
+            <label for="contactPreset" style="margin-top:0;">Choix Médiathèque</label>
+            <select id="contactPreset">
+              <option value="SARZEAU">Médiathèque de Sarzeau - 02 97 48 29 42</option>
+              <option value="ST_GILDAS">Médiathèque de Saint-Gildas de Rhuys - 02 97 48 29 41</option>
+              <option value="ST_ARMEL">Médiathèque de Saint-Armel - 02 97 48 29 49</option>
+              <option value="CUSTOM">Personnalisé</option>
+            </select>
+          </div>
+          <div>
+            <label for="contactLine" style="margin-top:0;">Ligne Médiathèque + téléphone</label>
+            <input id="contactLine" type="text" value="" />
+          </div>
+        </div>
+
+        <label for="publicCible">Public (triangle blanc)</label>
+        <textarea id="publicCible" placeholder="Ex : à partir de&#10;7 ans"></textarea>
+        <div class="hint">2 lignes max.</div>
+
+        <label>Logos ponctuels (blanc tournant — bas gauche, sous l’URL)</label>
+        <div class="two-cols" style="margin-top:8px;">
+          <div>
+            <label for="footerLogo1" style="margin-top:0;">Logo bas gauche 1 (optionnel)</label>
+            <input id="footerLogo1" type="file" accept="image/*" />
+            <div id="footerLogo1State" class="small"></div>
+            <button id="btnClearFooterLogo1" class="secondary" type="button" style="margin-top:8px;">Retirer le logo 1</button>
+          </div>
+          <div>
+            <label for="footerLogo2" style="margin-top:0;">Logo bas gauche 2 (optionnel)</label>
+            <input id="footerLogo2" type="file" accept="image/*" />
+            <div id="footerLogo2State" class="small"></div>
+            <button id="btnClearFooterLogo2" class="secondary" type="button" style="margin-top:8px;">Retirer le logo 2</button>
+          </div>
+        </div>
+
+        <input id="footerLogo1Id" type="hidden" />
+        <input id="footerLogo2Id" type="hidden" />
+
+
+        <input id="entryId" type="hidden" />
+
+        <div class="actions">
+          <button class="primary" id="btnGenerate" type="button">Générer le PDF</button>
+          <button class="secondary" id="btnDownload" type="button" disabled>Télécharger le PDF</button>
+          <button class="secondary" id="btnResetForm" type="button">Réinitialiser</button>
+        </div>
+
+        <div id="status" class="status"></div>
+        <div class="small" style="margin-top:6px;">URL du site fixe : mediathequesdugolfe.bzh</div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Historique -->
+    <div id="tabHistory" class="tab-panel">
+      <div class="card">
+        <strong>Historique</strong>
+        <p class="small">“Modifier” recharge les champs puis bascule sur “Rédaction”. “Supprimer affiche” supprime le PDF (corbeille Drive) et la ligne du tableur.</p>
+
+        <div class="actions">
+          <button class="secondary" id="refreshHistory" type="button">Actualiser</button>
+        </div>
+
+        <div id="historyContent"></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Logos & polices -->
+    <div id="tabConfig" class="tab-panel">
+      <div class="card">
+        <div class="config-header" onclick="toggleConfig()">
+          <div>
+            <strong>Configuration (logos + polices)</strong>
+            <div class="small">Sauvegardé dans le navigateur.</div>
+          </div>
+          <div id="toggleArrow" class="toggle-arrow">&#9660;</div>
+        </div>
+
+        <div id="configBody" class="config-body">
+          <div class="config-grid" style="margin-top:12px;">
+
+            <div class="config-item">
+              <label>Logo Médiathèque (haut gauche)</label>
+              <input id="uploadLogoMediatheque" type="file" accept="image/*" />
+              <div id="statusMediatheque" class="config-status missing">Non configuré</div>
+              <div class="usage-hint">→ Zone logo en haut à gauche</div>
+              <div class="font-preview" id="previewMediathequeWrap" style="display:none;">
+                <img id="imgPreviewMediatheque" alt="" style="max-width:100%;border-radius:10px;">
+              </div>
+            </div>
+
+            <div class="config-item">
+              <label>Logo GMVA (bas droit)</label>
+              <input id="uploadLogoGMVA" type="file" accept="image/*" />
+              <div id="statusGMVA" class="config-status missing">Non configuré</div>
+              <div class="usage-hint">→ Zone logo en bas à droite</div>
+              <div class="font-preview" id="previewGMVAWrap" style="display:none;">
+                <img id="imgPreviewGMVA" alt="" style="max-width:100%;border-radius:10px;">
+              </div>
+            </div>
+
+            <div class="config-item">
+              <label>Police Rias</label>
+              <input id="uploadFontRias" type="file" accept=".otf,.ttf,.woff,.woff2" />
+              <div id="statusFontRias" class="config-status missing">Non configuré</div>
+              <div class="usage-hint">→ Titre principal</div>
+              <div class="font-preview" id="previewFontRias" style="display:none;">
+                <p class="sample-title" style="font-family:'Rias',cursive;font-weight:700;">Rias</p>
+                <p class="sample-text" style="font-family:'Rias',cursive;font-weight:700;">SÉANCES DE JEU VIDÉO</p>
+              </div>
+            </div>
+
+            <div class="config-item">
+              <label>Police Roboto Bold</label>
+              <input id="uploadFontRobotoBold" type="file" accept=".otf,.ttf,.woff,.woff2" />
+              <div id="statusFontRobotoBold" class="config-status missing">Non configuré</div>
+              <div class="usage-hint">→ Dates + public</div>
+              <div class="font-preview" id="previewFontRobotoBold" style="display:none;">
+                <p class="sample-title" style="font-family:'Roboto',sans-serif;font-weight:700;">Roboto Bold</p>
+                <p class="sample-text" style="font-family:'Roboto',sans-serif;font-weight:700;">JEUDI 26 FÉVRIER À 14H</p>
+              </div>
+            </div>
+
+            <div class="config-item">
+              <label>Police VAG Rounded Std Bold</label>
+              <input id="uploadFontVagRounded" type="file" accept=".otf,.ttf,.woff,.woff2" />
+              <div id="statusFontVagRounded" class="config-status missing">Non configuré</div>
+              <div class="usage-hint">→ Accroche + infos</div>
+              <div class="font-preview" id="previewFontVagRounded" style="display:none;">
+                <p class="sample-title" style="font-family:'VAG Rounded Std',sans-serif;font-weight:700;">VAG Rounded Std Bold</p>
+                <p class="sample-text" style="font-family:'VAG Rounded Std',sans-serif;font-weight:700;">Aperçu : 0123456789 &amp; éèàç</p>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="actions">
+            <button class="danger" type="button" onclick="clearAll()">Réinitialiser logos et polices</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // =========================
+    // Constantes
+    // =========================
+    var SITE_URL_FIXED = 'mediathequesdugolfe.bzh';
+
+    var KEYS = {
+      logoMediatheque: 'med_logo_mediatheque',
+      logoGmva: 'med_logo_gmva',
+      fontRias: 'med_font_rias',
+      fontRobotoBold: 'med_font_roboto_bold',
+      fontVagRounded: 'med_font_vag_rounded'
+    };
+
+    var CONTACT_PRESETS = {
+      SARZEAU: 'Médiathèque de Sarzeau - 02 97 48 29 42',
+      ST_GILDAS: 'Médiathèque de Saint-Gildas de Rhuys - 02 97 48 29 41',
+      ST_ARMEL: 'Médiathèque de Saint-Armel - 02 97 48 29 49'
+    };
+
+    var lastPdfUrl = '';
+
+    function toDriveDownloadUrl(url) {
+      if (!url) return '';
+      var m = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      return m ? ('https://drive.google.com/uc?export=download&id=' + m[1]) : url;
+    }
+
+    // =========================
+    // Tabs
+    // =========================
+    function setActiveTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(function(btn){
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
+      });
+      document.querySelectorAll('.tab-panel').forEach(function(p){
+        p.classList.toggle('active', p.id === tabId);
+      });
+    }
+    document.querySelectorAll('.tab-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ setActiveTab(btn.dataset.tab); });
+    });
+
+    // =========================
+    // Config toggle
+    // =========================
+    function toggleConfig() {
+      var body = document.getElementById('configBody');
+      var arrow = document.getElementById('toggleArrow');
+      var hidden = body.classList.toggle('hidden');
+      arrow.innerHTML = hidden ? '&#9654;' : '&#9660;';
+    }
+
+    // =========================
+    // Helpers
+    // =========================
+    function setStatus(msg){ document.getElementById('status').textContent = msg || ''; }
+
+    function updateFooterLogoStates(){
+      var id1 = (document.getElementById('footerLogo1Id').value || '').trim();
+      var id2 = (document.getElementById('footerLogo2Id').value || '').trim();
+      document.getElementById('footerLogo1State').textContent = id1 ? 'Logo 1 : OK' : 'Logo 1 : aucun';
+      document.getElementById('footerLogo2State').textContent = id2 ? 'Logo 2 : OK' : 'Logo 2 : aucun';
+    }
+
+
+    function ensureFontStyle(id){
+      var existing = document.getElementById(id);
+      if (existing) return existing;
+      var el = document.createElement('style');
+      el.id = id;
+      document.head.appendChild(el);
+      return el;
+    }
+
+    function applyFontFace(styleId, familyName, dataUrl){
+      var el = ensureFontStyle(styleId);
+      el.textContent = dataUrl
+        ? '@font-face { font-family: "' + familyName + '"; font-style: normal; font-weight: 700; src: url(' + dataUrl + '); }'
+        : '';
+    }
+
+    // =========================
+    // Logos / fonts previews
+    // =========================
+    function loadLogoPreview(storageKey, wrapId, imgId, statusId){
+      var data = localStorage.getItem(storageKey);
+      var wrap = document.getElementById(wrapId);
+      var img = document.getElementById(imgId);
+      var status = document.getElementById(statusId);
+      if (data){
+        wrap.style.display = 'block';
+        img.src = data;
+        status.textContent = 'OK';
+        status.className = 'config-status ok';
+      } else {
+        wrap.style.display = 'none';
+        img.src = '';
+        status.textContent = 'Non configuré';
+        status.className = 'config-status missing';
+      }
+    }
+
+    function setupLogoUpload(inputId, storageKey, wrapId, imgId, statusId){
+      var input = document.getElementById(inputId);
+      input.addEventListener('change', function(){
+        var file = input.files && input.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(){
+          localStorage.setItem(storageKey, reader.result);
+          loadLogoPreview(storageKey, wrapId, imgId, statusId);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadFontPreview(storageKey, previewId, statusId, styleId, familyName){
+      var data = localStorage.getItem(storageKey);
+      var preview = document.getElementById(previewId);
+      var status = document.getElementById(statusId);
+      if (data){
+        preview.style.display = 'block';
+        status.textContent = 'OK';
+        status.className = 'config-status ok';
+        applyFontFace(styleId, familyName, data);
+      } else {
+        preview.style.display = 'none';
+        status.textContent = 'Non configuré';
+        status.className = 'config-status missing';
+        applyFontFace(styleId, familyName, '');
+      }
+    }
+
+    function setupFontUpload(inputId, storageKey, previewId, statusId, styleId, familyName){
+      var input = document.getElementById(inputId);
+      input.addEventListener('change', function(){
+        var file = input.files && input.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function(){
+          localStorage.setItem(storageKey, reader.result);
+          loadFontPreview(storageKey, previewId, statusId, styleId, familyName);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function initAllPreviews(){
+      loadLogoPreview(KEYS.logoMediatheque,'previewMediathequeWrap','imgPreviewMediatheque','statusMediatheque');
+      loadLogoPreview(KEYS.logoGmva,'previewGMVAWrap','imgPreviewGMVA','statusGMVA');
+      loadFontPreview(KEYS.fontRias,'previewFontRias','statusFontRias','styleFontRias','Rias');
+      loadFontPreview(KEYS.fontRobotoBold,'previewFontRobotoBold','statusFontRobotoBold','styleFontRoboto','Roboto');
+      loadFontPreview(KEYS.fontVagRounded,'previewFontVagRounded','statusFontVagRounded','styleFontVag','VAG Rounded Std');
+    }
+
+    function clearAll(){
+      Object.values(KEYS).forEach(function(k){ localStorage.removeItem(k); });
+      initAllPreviews();
+    }
+
+    setupLogoUpload('uploadLogoMediatheque',KEYS.logoMediatheque,'previewMediathequeWrap','imgPreviewMediatheque','statusMediatheque');
+    setupLogoUpload('uploadLogoGMVA',KEYS.logoGmva,'previewGMVAWrap','imgPreviewGMVA','statusGMVA');
+    setupFontUpload('uploadFontRias',KEYS.fontRias,'previewFontRias','statusFontRias','styleFontRias','Rias');
+    setupFontUpload('uploadFontRobotoBold',KEYS.fontRobotoBold,'previewFontRobotoBold','statusFontRobotoBold','styleFontRoboto','Roboto');
+    setupFontUpload('uploadFontVagRounded',KEYS.fontVagRounded,'previewFontVagRounded','statusFontVagRounded','styleFontVag','VAG Rounded Std');
+
+    initAllPreviews();
+
+    // =========================
+    // Infos -> extraction dernière ligne (si contactLine vide)
+    // =========================
+    var _extractLock = false;
+
+    function syncPresetFromContactLine(){
+      var v = (document.getElementById('contactLine').value || '').trim();
+      var sel = document.getElementById('contactPreset');
+      if (!v){ sel.value = 'SARZEAU'; return; }
+
+      var matchKey = null;
+      Object.keys(CONTACT_PRESETS).forEach(function(k){
+        if (CONTACT_PRESETS[k] === v) matchKey = k;
+      });
+      sel.value = matchKey ? matchKey : 'CUSTOM';
+    }
+
+    function extractContactFromInfos(){
+      if (_extractLock) return;
+      _extractLock = true;
+      try{
+        var ta = document.getElementById('infos');
+        var out = document.getElementById('contactLine');
+        if ((out.value || '').trim()) return;
+
+        var lines = String(ta.value || '').split(/\r?\n/);
+        while (lines.length && lines[lines.length-1].trim() === '') lines.pop();
+        if (!lines.length){ out.value=''; ta.value=''; return; }
+
+        var last = (lines[lines.length-1] || '').trim();
+        if (!last) return;
+
+        if (!/M[ée]diath[èe]que/i.test(last) && !/\b02\s?\d{2}/.test(last)) return;
+
+        lines.pop();
+        while (lines.length && lines[lines.length-1].trim() === '') lines.pop();
+
+        out.value = last;
+        ta.value = lines.join('\n');
+
+        syncPresetFromContactLine();
+      } finally {
+        _extractLock = false;
+      }
+    }
+
+    document.getElementById('infos').addEventListener('blur', extractContactFromInfos);
+
+    // =========================
+    // Presets contact
+    // =========================
+    document.getElementById('contactPreset').addEventListener('change', function(){
+      var sel = document.getElementById('contactPreset').value;
+      if (sel === 'CUSTOM') return;
+      document.getElementById('contactLine').value = CONTACT_PRESETS[sel] || '';
+    });
+
+    document.getElementById('contactLine').addEventListener('input', syncPresetFromContactLine);
+
+    // =========================
+    // Historique
+    // =========================
+    function loadHistory(){
+      google.script.run.withSuccessHandler(function(res){
+        var entries = [];
+        try{ entries = JSON.parse(res) || []; } catch(e){ entries = []; }
+        renderHistory(entries);
+      }).withFailureHandler(function(err){
+        setStatus('Erreur serveur : ' + (err && err.message ? err.message : err));
+      }).listPosterEntries();
+    }
+
+    function renderHistory(entries){
+      var root = document.getElementById('historyContent');
+      if (!entries || !entries.length){
+        root.innerHTML = '<div class="small">Aucune entrée.</div>';
+        return;
+      }
+
+      var html = '<div class="history-list">';
+      html += entries.map(function(it){
+        var title = (it.title || '').trim();
+        var t2 = (it.titleLine2 || '').trim();
+        var fullTitle = (t2 ? (title + ' ' + t2) : title) || '(sans titre)';
+        var upd = (it.updatedAt || it.createdAt || '').toString();
+        var dates = (it.dates || '').toString();
+        var meta = [upd, dates].filter(Boolean).join(' • ');
+        var pdf = it.pdfUrl || '';
+
+        return '' +
+          '<div class="history-row">' +
+            '<div class="history-main">' +
+              '<div class="history-title">' + fullTitle.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
+              '<div class="history-meta">' + meta.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
+            '</div>' +
+            '<div class="history-actions">' +
+              (pdf ? '<a class="chip" href="' + pdf + '" target="_blank" rel="noopener">Visualiser le PDF</a>' : '') +
+              '<button class="chip primary" type="button" data-action="edit" data-id="' + (it.id || '') + '">Modifier</button>' +
+              '<button class="chip danger" type="button" data-action="delete" data-id="' + (it.id || '') + '">Supprimer affiche</button>' +
+            '</div>' +
+          '</div>';
+      }).join('');
+      html += '</div>';
+
+      root.innerHTML = html;
+
+      root.querySelectorAll('button[data-action][data-id]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var id = btn.getAttribute('data-id');
+          var action = btn.getAttribute('data-action');
+
+          if (action === 'edit'){
+            var entry = entries.find(function(e){ return (e.id || '') === id; });
+            if (entry){
+              loadEntryIntoForm(entry);
+              setActiveTab('tabEditor');
+              setStatus('Entrée chargée : ' + (entry.id || ''));
+            }
+            return;
+          }
+
+          if (action === 'delete'){
+            if (!confirm('Supprimer cette affiche (PDF + historique) ?')) return;
+
+            google.script.run.withSuccessHandler(function(res){
+              try{
+                var out = JSON.parse(res);
+                if (out && out.ok){
+                  if ((document.getElementById('entryId').value || '') === id) resetForm();
+                  loadHistory();
+                  setStatus('Affiche supprimée.');
+                } else {
+                  setStatus('Suppression impossible.');
+                }
+              } catch(e){
+                setStatus('Erreur : ' + e);
+              }
+            }).withFailureHandler(function(err){
+              setStatus('Erreur serveur : ' + (err && err.message ? err.message : err));
+            }).deletePosterEntry(id);
+          }
+        });
+      });
+    }
+
+    function loadEntryIntoForm(it){
+      document.getElementById('entryId').value = it.id || '';
+      document.getElementById('title').value = it.title || '';
+      document.getElementById('titleLine2').value = it.titleLine2 || '';
+      document.getElementById('subtitle').value = it.subtitle || '';
+      document.getElementById('dates').value = it.dates || '';
+      document.getElementById('infos').value = it.infos || '';
+      document.getElementById('publicCible').value = it.publicCible || '';
+
+      document.getElementById('footerLogo1Id').value = it.footerLogo1Id || '';
+      document.getElementById('footerLogo2Id').value = it.footerLogo2Id || '';
+      document.getElementById('footerLogo1').value = '';
+      document.getElementById('footerLogo2').value = '';
+      updateFooterLogoStates();
+
+
+      document.getElementById('contactLine').value = it.contactLine || '';
+      document.getElementById('showContactLine').checked = (String(it.showContactLine).toLowerCase() === 'true' || it.showContactLine === true);
+      syncPresetFromContactLine();
+
+      lastPdfUrl = it.pdfUrl || '';
+      document.getElementById('btnDownload').disabled = !lastPdfUrl;
+    }
+
+    document.getElementById('refreshHistory').addEventListener('click', loadHistory);
+
+    // =========================
+    // Génération PDF
+    // =========================
+    function readFileAsDataUrl(file){
+      return new Promise(function(resolve, reject){
+        if (!file){ resolve(''); return; }
+        var reader = new FileReader();
+        reader.onload = function(){ resolve(reader.result); };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function generatePdf(){
+      setStatus('Préparation...');
+      extractContactFromInfos();
+
+      var entryId = (document.getElementById('entryId').value || '').trim();
+      if (entryId){
+        var choix = prompt(
+          "Cette affiche existe déjà.\n\n" +
+          "1 — Écraser l'ancienne version\n" +
+          "2 — Créer une nouvelle affiche\n\n" +
+          "Tapez 1 ou 2 :"
+        );
+        if (choix === '2') entryId = '';
+        else if (choix !== '1') return;
+      }
+
+      var fileInput = document.getElementById('mainImage');
+      var file = fileInput.files && fileInput.files[0];
+
+      if (!file && !entryId){
+        setStatus("Image obligatoire pour une nouvelle affiche.");
+        return;
+      }
+
+      var payload = {
+        entryId: entryId,
+
+        title: (document.getElementById('title').value || '').trim(),
+        titleLine2: (document.getElementById('titleLine2').value || '').trim(),
+        subtitle: (document.getElementById('subtitle').value || '').trim(),
+        dates: (document.getElementById('dates').value || '').trim(),
+        infos: (document.getElementById('infos').value || '').trim(),
+
+        showContactLine: !!document.getElementById('showContactLine').checked,
+        contactLine: (document.getElementById('contactLine').value || '').trim(),
+
+        publicCible: (document.getElementById('publicCible').value || '').trim(),
+
+        siteUrl: SITE_URL_FIXED,
+
+        mainImage: file ? await readFileAsDataUrl(file) : '',
+
+        footerLogo1: (document.getElementById('footerLogo1').files && document.getElementById('footerLogo1').files[0]) ? await readFileAsDataUrl(document.getElementById('footerLogo1').files[0]) : '',
+        footerLogo2: (document.getElementById('footerLogo2').files && document.getElementById('footerLogo2').files[0]) ? await readFileAsDataUrl(document.getElementById('footerLogo2').files[0]) : '',
+        footerLogo1Id: (document.getElementById('footerLogo1Id').value || '').trim(),
+        footerLogo2Id: (document.getElementById('footerLogo2Id').value || '').trim(),
+
+
+        topLogo: localStorage.getItem(KEYS.logoMediatheque) || '',
+        bottomLogo: localStorage.getItem(KEYS.logoGmva) || '',
+        fontRias: localStorage.getItem(KEYS.fontRias) || '',
+        fontRobotoBold: localStorage.getItem(KEYS.fontRobotoBold) || '',
+        fontVagRounded: localStorage.getItem(KEYS.fontVagRounded) || ''
+      };
+
+      if (!payload.title){
+        setStatus('Titre obligatoire.');
+        return;
+      }
+
+      setStatus('Génération PDF...');
+      google.script.run
+        .withSuccessHandler(function(res){
+          try{
+            var out = JSON.parse(res);
+            if (out && out.ok){
+              document.getElementById('entryId').value = out.entryId || '';
+              setStatus('OK : ' + (out.fileName || 'PDF généré'));
+              loadHistory();
+
+              lastPdfUrl = out.pdfUrl || '';
+
+              document.getElementById('footerLogo1Id').value = out.footerLogo1Id || document.getElementById('footerLogo1Id').value || '';
+              document.getElementById('footerLogo2Id').value = out.footerLogo2Id || document.getElementById('footerLogo2Id').value || '';
+              document.getElementById('footerLogo1').value = '';
+              document.getElementById('footerLogo2').value = '';
+              updateFooterLogoStates();
+
+              document.getElementById('btnDownload').disabled = !lastPdfUrl;
+            } else {
+              setStatus('Erreur : ' + ((out && out.error) ? out.error : 'réponse inattendue'));
+            }
+          } catch(e){
+            setStatus('Erreur : ' + e);
+          }
+        })
+        .withFailureHandler(function(err){
+          setStatus('Erreur serveur : ' + (err && err.message ? err.message : err));
+        })
+        .createPoster(JSON.stringify(payload));
+    }
+
+    function resetForm(){
+      document.getElementById('entryId').value = '';
+      document.getElementById('mainImage').value = '';
+      document.getElementById('title').value = '';
+      document.getElementById('titleLine2').value = '';
+      document.getElementById('subtitle').value = '';
+      document.getElementById('dates').value = '';
+      document.getElementById('infos').value = '';
+      document.getElementById('publicCible').value = '';
+
+      document.getElementById('footerLogo1').value = '';
+      document.getElementById('footerLogo2').value = '';
+      document.getElementById('footerLogo1Id').value = '';
+      document.getElementById('footerLogo2Id').value = '';
+      updateFooterLogoStates();
+
+
+      document.getElementById('showContactLine').checked = true;
+      document.getElementById('contactPreset').value = 'SARZEAU';
+      document.getElementById('contactLine').value = CONTACT_PRESETS.SARZEAU;
+
+      lastPdfUrl = '';
+      document.getElementById('btnDownload').disabled = true;
+
+      setStatus('Formulaire réinitialisé.');
+    }
+
+    document.getElementById('btnGenerate').addEventListener('click', generatePdf);
+    document.getElementById('btnResetForm').addEventListener('click', resetForm);
+
+    document.getElementById('btnClearFooterLogo1').addEventListener('click', function(){
+      document.getElementById('footerLogo1').value = '';
+      document.getElementById('footerLogo1Id').value = '';
+      updateFooterLogoStates();
+    });
+    document.getElementById('btnClearFooterLogo2').addEventListener('click', function(){
+      document.getElementById('footerLogo2').value = '';
+      document.getElementById('footerLogo2Id').value = '';
+      updateFooterLogoStates();
+    });
+
+
+    document.getElementById('btnDownload').addEventListener('click', function(){
+      if (!lastPdfUrl) return;
+      window.open(toDriveDownloadUrl(lastPdfUrl), '_blank');
+    });
+
+    // init defaults
+    document.getElementById('contactLine').value = CONTACT_PRESETS.SARZEAU;
+    syncPresetFromContactLine();
+    loadHistory();
+  </script>
+</body>
+</html>
