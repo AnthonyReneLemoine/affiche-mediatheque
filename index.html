@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Créateur d'affiches Médiathèque A3</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body { font-family: "Helvetica Neue", Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 24px; }
@@ -170,7 +171,7 @@
 
         <div class="actions" style="margin-top:18px;">
           <button class="primary" id="btnPreview" type="button">👁 Prévisualiser</button>
-          <button class="primary" id="btnPrint" type="button">🖨 Générer PDF</button>
+          <button class="primary" id="btnPrint" type="button">⬇ Enregistrer PDF</button>
           <button class="secondary" id="btnResetForm" type="button">Réinitialiser</button>
         </div>
 
@@ -277,7 +278,7 @@
       <div class="modal-header">
         <h2>Prévisualisation de l'affiche</h2>
         <div style="display:flex;gap:8px;align-items:center;">
-          <button id="btnPrintFromModal" class="primary" type="button">🖨 Générer PDF</button>
+          <button id="btnPrintFromModal" class="primary" type="button">⬇ Enregistrer PDF</button>
           <button id="btnClosePreview" type="button">✕ Fermer</button>
         </div>
       </div>
@@ -1012,39 +1013,73 @@
   });
 
   // =========================
-  // Génération PDF (impression)
+  // Génération PDF (enregistrement direct)
   // =========================
   function generatePdf() {
     var payload = collectPayload();
     if (!payload.title) { setStatus('Titre obligatoire pour générer le PDF.'); return; }
     if (!payload.mainImage) { setStatus('Image principale obligatoire.'); return; }
 
-    setStatus('Ouverture de la fenêtre d\'impression...');
-
     var filename = buildFilename();
+    setStatus('Génération du PDF en cours…');
+
     var html = buildPosterHtml(payload);
 
-    // Injecter le titre dans le <head> du poster : le navigateur s'en sert comme nom de fichier PDF
-    html = html.replace('<meta charset="utf-8">', '<meta charset="utf-8"><title>' + filename + '</title>');
+    // Créer un conteneur caché hors viewport avec les dimensions A3 exactes
+    var container = document.createElement('div');
+    container.style.cssText = [
+      'position:fixed',
+      'left:-9999px',
+      'top:0',
+      'width:297mm',
+      'height:420mm',
+      'overflow:hidden',
+      'background:#fff'
+    ].join(';');
+    document.body.appendChild(container);
 
-    var win = window.open('', '_blank');
-    if (!win) {
-      setStatus('Impossible d\'ouvrir la fenêtre. Vérifiez les popups bloquées.');
-      return;
-    }
+    // Écrire le HTML dans le container via srcdoc d'un iframe temporaire
+    var tmpFrame = document.createElement('iframe');
+    tmpFrame.style.cssText = 'position:absolute;left:0;top:0;width:297mm;height:420mm;border:none;';
+    container.appendChild(tmpFrame);
 
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
+    var doc = tmpFrame.contentDocument || tmpFrame.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
 
-    // Attendre le chargement des images/polices avant d'imprimer
-    win.onload = function() {
-      setTimeout(function() {
-        win.focus();
-        win.print();
-        setStatus('Fenêtre d\'impression ouverte → "Enregistrer en PDF" pour obtenir : ' + filename + '.pdf');
-      }, 500);
-    };
+    // Attendre le rendu complet (images + polices)
+    setTimeout(function() {
+      var posterEl = tmpFrame.contentDocument.querySelector('.poster') || tmpFrame.contentDocument.body;
+
+      var opt = {
+        margin:      0,
+        filename:    filename + '.pdf',
+        image:       { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale:          3,          // haute résolution
+          useCORS:        true,
+          allowTaint:     true,
+          backgroundColor: '#ffffff',
+          width:  Math.round(297 * 96 / 25.4),   // 1122 px
+          height: Math.round(420 * 96 / 25.4)    // 1587 px
+        },
+        jsPDF: {
+          unit:        'mm',
+          format:      'a3',
+          orientation: 'portrait'
+        }
+      };
+
+      html2pdf().set(opt).from(posterEl).save().then(function() {
+        document.body.removeChild(container);
+        setStatus('PDF enregistré : ' + filename + '.pdf');
+      }).catch(function(err) {
+        document.body.removeChild(container);
+        setStatus('Erreur lors de la génération : ' + err);
+      });
+
+    }, 800); // délai pour laisser les images/polices se charger dans l'iframe
   }
 
   document.getElementById('btnPrint').addEventListener('click', generatePdf);
