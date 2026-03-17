@@ -5,78 +5,97 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Créateur d'affiches Médiathèque A3</title>
   <style>
-    body{font-family:"Helvetica Neue",Arial,sans-serif;background:#f4f4f4;margin:0;padding:24px;}
-    .container{max-width:980px;margin:0 auto;background:#fff;border-radius:12px;padding:18px 18px 22px;box-shadow:0 6px 24px rgba(0,0,0,.12);}
-    h1{margin:0 0 12px;font-size:20px;}
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: "Helvetica Neue", Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 24px; }
+    .container { max-width: 980px; margin: 0 auto; background: #fff; border-radius: 12px; padding: 18px 18px 22px; box-shadow: 0 6px 24px rgba(0,0,0,.12); }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    h1 { margin: 0; font-size: 20px; }
+    .version { font-size: 11px; color: #888; font-weight: 400; }
 
-    .tabs{display:flex;gap:8px;margin:6px 0 14px;flex-wrap:wrap;}
-    .tab-btn{border:1px solid #e1e1e1;border-radius:999px;padding:8px 12px;background:#fafafa;font-weight:800;cursor:pointer;font-size:13px;}
-    .tab-btn.active{background:#111;color:#fff;border-color:#111;}
-    .tab-panel{display:none;}
-    .tab-panel.active{display:block;}
+    .tabs { display: flex; gap: 8px; margin: 6px 0 14px; flex-wrap: wrap; }
+    .tab-btn { border: 1px solid #e1e1e1; border-radius: 999px; padding: 8px 12px; background: #fafafa; font-weight: 800; cursor: pointer; font-size: 13px; }
+    .tab-btn.active { background: #111; color: #fff; border-color: #111; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
-    .card{border:1px solid #e1e1e1;border-radius:12px;padding:12px;background:#fafafa;}
-    label{display:block;font-weight:800;margin:12px 0 6px;}
-    input[type="text"], textarea, select{
-      width:100%;box-sizing:border-box;border:1px solid #d6d6d6;border-radius:10px;padding:10px 12px;font-size:14px;outline:none;background:#fff;
+    .card { border: 1px solid #e1e1e1; border-radius: 12px; padding: 12px; background: #fafafa; }
+    label { display: block; font-weight: 800; margin: 12px 0 6px; }
+    input[type="text"], textarea, select {
+      width: 100%; border: 1px solid #d6d6d6; border-radius: 10px; padding: 10px 12px; font-size: 14px; outline: none; background: #fff;
     }
-    textarea{min-height:92px;resize:vertical;white-space:pre-wrap;}
-    select{padding:10px 12px;}
-    .hint{font-size:12px;color:#555;margin-top:4px;}
-    .actions{display:flex;gap:10px;align-items:center;margin-top:14px;flex-wrap:wrap;}
-    button{border:0;border-radius:10px;padding:10px 12px;font-size:14px;font-weight:900;cursor:pointer;}
-    button.primary{background:#0b63ce;color:#fff;}
-    button.secondary{background:#e9edf5;color:#1b1b1b;}
-    button.danger{background:#f3d3d3;color:#7b0d0d;}
-    button:disabled{opacity:.6;cursor:not-allowed;}
-    .status{margin-top:10px;font-size:13px;color:#333;}
-    .small{font-size:12px;color:#555;}
+    textarea { min-height: 92px; resize: vertical; white-space: pre-wrap; }
+    select { padding: 10px 12px; }
+    .hint { font-size: 12px; color: #555; margin-top: 4px; }
+    .actions { display: flex; gap: 10px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+    button { border: 0; border-radius: 10px; padding: 10px 12px; font-size: 14px; font-weight: 900; cursor: pointer; }
+    button.primary { background: #786fb2; color: #fff; }
+    button.secondary { background: #e9edf5; color: #1b1b1b; }
+    button.danger { background: #f3d3d3; color: #7b0d0d; }
+    button.success { background: #d6f5d6; color: #1e6b1e; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    .status { margin-top: 10px; font-size: 13px; color: #333; min-height: 18px; }
+    .small { font-size: 12px; color: #555; }
 
-    /* Config */
-    .config-header{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;user-select:none;}
-    .toggle-arrow{font-size:18px;font-weight:900;width:24px;text-align:center;}
-    .config-body.hidden{display:none;}
-    .config-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px;}
-    @media (max-width: 900px){ .config-grid{grid-template-columns:1fr;} }
-    .config-item{border:1px solid #e1e1e1;border-radius:12px;background:#fff;padding:10px;}
-    .config-item label{margin:0 0 6px;}
-    .config-status{display:inline-block;padding:4px 8px;border-radius:999px;font-weight:900;font-size:12px;margin-top:8px;}
-    .config-status.ok{background:#d6f5d6;color:#1e6b1e;}
-    .config-status.missing{background:#ffe1e1;color:#8f1a1a;}
-    .font-preview{margin-top:10px;padding:10px;background:#fafafa;border-radius:10px;border:1px solid #eee;}
-    .sample-title{margin:0 0 6px;font-size:16px;font-weight:900;}
-    .sample-text{margin:0;font-size:13px;font-weight:700;}
-    .usage-hint{font-size:12px;color:#666;margin-top:6px;}
+    .config-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; user-select: none; }
+    .toggle-arrow { font-size: 18px; font-weight: 900; width: 24px; text-align: center; }
+    .config-body.hidden { display: none; }
+    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
+    @media (max-width: 900px) { .config-grid { grid-template-columns: 1fr; } }
+    .config-item { border: 1px solid #e1e1e1; border-radius: 12px; background: #fff; padding: 10px; }
+    .config-item label { margin: 0 0 6px; }
+    .config-status { display: inline-block; padding: 4px 8px; border-radius: 999px; font-weight: 900; font-size: 12px; margin-top: 8px; }
+    .config-status.ok { background: #d6f5d6; color: #1e6b1e; }
+    .config-status.missing { background: #ffe1e1; color: #8f1a1a; }
+    .font-preview { margin-top: 10px; padding: 10px; background: #fafafa; border-radius: 10px; border: 1px solid #eee; }
+    .sample-title { margin: 0 0 6px; font-size: 16px; font-weight: 900; }
+    .sample-text { margin: 0; font-size: 13px; font-weight: 700; }
+    .usage-hint { font-size: 12px; color: #666; margin-top: 6px; }
 
-    /* Historique compact */
-    .history-list{margin-top:10px;border:1px solid #e1e1e1;border-radius:12px;overflow:hidden;background:#fff;}
-    .history-row{display:flex;align-items:center;gap:10px;padding:6px 10px;border-bottom:1px solid #eee;font-size:12.5px;line-height:1.2;}
-    .history-row:last-child{border-bottom:none;}
-    .history-main{flex:1;min-width:0;}
-    .history-title{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .history-meta{margin-top:2px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .history-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;}
-    .chip{
-      display:inline-block;padding:6px 10px;border-radius:999px;font-weight:900;font-size:12px;
-      border:1px solid #e1e1e1;background:#fafafa;cursor:pointer;text-decoration:none;color:#111;
+    .inline-toggle { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+    .inline-toggle input { width: auto; }
+    .two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 900px) { .two-cols { grid-template-columns: 1fr; } }
+
+    /* Footer logo state badges */
+    .logo-state { display: inline-block; padding: 3px 8px; border-radius: 999px; font-weight: 900; font-size: 11px; margin-top: 6px; background: #ffe1e1; color: #8f1a1a; }
+    .logo-state.ok { background: #d6f5d6; color: #1e6b1e; }
+
+    /* Preview modal */
+    #previewModal {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7);
+      z-index: 1000; overflow: auto; padding: 20px;
     }
-    .chip.primary{background:#0b63ce;border-color:#0b63ce;color:#fff;}
-    .chip.danger{background:#f3d3d3;border-color:#f3d3d3;color:#7b0d0d;}
+    #previewModal.open { display: flex; align-items: flex-start; justify-content: center; }
+    .modal-inner { background: #fff; border-radius: 12px; padding: 16px; max-width: 900px; width: 100%; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .modal-header h2 { margin: 0; font-size: 16px; }
+    #btnClosePreview { background: #e9edf5; border-radius: 8px; padding: 6px 12px; font-size: 13px; font-weight: 700; border: 0; cursor: pointer; }
+    #posterPreviewWrap {
+      width: 100%; overflow: auto;
+    }
+    /* The preview iframe */
+    #posterPreviewFrame {
+      border: 1px solid #e1e1e1;
+      border-radius: 8px;
+      display: block;
+      width: 420px; /* A3 portrait scaled */
+      height: 594px;
+      transform-origin: top left;
+    }
 
-    /* Section contact */
-    .inline-toggle{display:flex;align-items:center;gap:10px;margin-top:8px;}
-    .inline-toggle input{width:auto;}
-    .two-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-    @media (max-width: 900px){ .two-cols{grid-template-columns:1fr;} }
+    /* Import/Export section */
+    .io-section { border: 1px solid #e1e1e1; border-radius: 12px; padding: 12px; background: #fff; margin-top: 12px; }
+    .io-section strong { font-size: 14px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Créateur d'affiches Médiathèque A3</h1>
+    <div class="top-bar">
+      <h1>Créateur d'affiches Médiathèque A3 <span class="version">v1.0.0</span></h1>
+    </div>
 
     <div class="tabs">
       <button class="tab-btn active" data-tab="tabEditor" type="button">Rédaction</button>
-      <button class="tab-btn" data-tab="tabHistory" type="button">Historique</button>
       <button class="tab-btn" data-tab="tabConfig" type="button">Logos &amp; polices</button>
     </div>
 
@@ -85,9 +104,9 @@
       <div class="card">
         <strong>Contenu</strong>
 
-        <!-- Ordre demandé -->
         <label for="mainImage">Image principale (fond)</label>
         <input id="mainImage" type="file" accept="image/*" />
+        <div id="mainImageState" class="logo-state" style="display:none;"></div>
 
         <label for="title">Titre (ligne 1)</label>
         <input id="title" type="text" value="" />
@@ -127,63 +146,57 @@
         </div>
 
         <label for="publicCible">Public (triangle blanc)</label>
-        <textarea id="publicCible" placeholder="Ex : à partir de&#10;7 ans"></textarea>
+        <textarea id="publicCible" placeholder="Ex : à partir de&#10;7 ans" style="min-height:60px;"></textarea>
         <div class="hint">2 lignes max.</div>
 
-        <label>Logos ponctuels (blanc tournant — bas gauche, sous l’URL)</label>
+        <label>Logos ponctuels (bas gauche, sous l'URL)</label>
         <div class="two-cols" style="margin-top:8px;">
           <div>
             <label for="footerLogo1" style="margin-top:0;">Logo bas gauche 1 (optionnel)</label>
             <input id="footerLogo1" type="file" accept="image/*" />
-            <div id="footerLogo1State" class="small"></div>
+            <div id="footerLogo1State" class="logo-state">Aucun</div>
             <button id="btnClearFooterLogo1" class="secondary" type="button" style="margin-top:8px;">Retirer le logo 1</button>
           </div>
           <div>
             <label for="footerLogo2" style="margin-top:0;">Logo bas gauche 2 (optionnel)</label>
             <input id="footerLogo2" type="file" accept="image/*" />
-            <div id="footerLogo2State" class="small"></div>
+            <div id="footerLogo2State" class="logo-state">Aucun</div>
             <button id="btnClearFooterLogo2" class="secondary" type="button" style="margin-top:8px;">Retirer le logo 2</button>
           </div>
         </div>
 
-        <input id="footerLogo1Id" type="hidden" />
-        <input id="footerLogo2Id" type="hidden" />
-
-
-        <input id="entryId" type="hidden" />
-
-        <div class="actions">
-          <button class="primary" id="btnGenerate" type="button">Générer le PDF</button>
-          <button class="secondary" id="btnDownload" type="button" disabled>Télécharger le PDF</button>
+        <div class="actions" style="margin-top:18px;">
+          <button class="primary" id="btnPreview" type="button">👁 Prévisualiser</button>
+          <button class="primary" id="btnPrint" type="button">🖨 Générer PDF</button>
           <button class="secondary" id="btnResetForm" type="button">Réinitialiser</button>
         </div>
 
         <div id="status" class="status"></div>
         <div class="small" style="margin-top:6px;">URL du site fixe : mediathequesdugolfe.bzh</div>
       </div>
-    </div>
 
-    <!-- TAB 2: Historique -->
-    <div id="tabHistory" class="tab-panel">
-      <div class="card">
-        <strong>Historique</strong>
-        <p class="small">“Modifier” recharge les champs puis bascule sur “Rédaction”. “Supprimer affiche” supprime le PDF (corbeille Drive) et la ligne du tableur.</p>
-
-        <div class="actions">
-          <button class="secondary" id="refreshHistory" type="button">Actualiser</button>
+      <!-- Import / Export JSON -->
+      <div class="io-section">
+        <strong>Sauvegarde / Import des données</strong>
+        <div class="hint" style="margin-top:4px;">Exportez les champs dans un fichier JSON pour pouvoir les réimporter plus tard et modifier l'affiche.</div>
+        <div class="actions" style="margin-top:10px;">
+          <button class="success" id="btnExportJson" type="button">⬇ Exporter JSON</button>
+          <label style="margin:0;">
+            <button class="secondary" type="button" onclick="document.getElementById('importJsonInput').click()">⬆ Importer JSON</button>
+          </label>
+          <input id="importJsonInput" type="file" accept=".json,application/json" style="display:none;" />
         </div>
-
-        <div id="historyContent"></div>
+        <div id="ioStatus" class="status"></div>
       </div>
     </div>
 
-    <!-- TAB 3: Logos & polices -->
+    <!-- TAB 2: Logos & polices -->
     <div id="tabConfig" class="tab-panel">
       <div class="card">
         <div class="config-header" onclick="toggleConfig()">
           <div>
             <strong>Configuration (logos + polices)</strong>
-            <div class="small">Sauvegardé dans le navigateur.</div>
+            <div class="small">Sauvegardé dans le navigateur (localStorage).</div>
           </div>
           <div id="toggleArrow" class="toggle-arrow">&#9660;</div>
         </div>
@@ -255,502 +268,741 @@
 
   </div>
 
+  <!-- Preview Modal -->
+  <div id="previewModal">
+    <div class="modal-inner">
+      <div class="modal-header">
+        <h2>Prévisualisation de l'affiche</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button id="btnPrintFromModal" class="primary" type="button">🖨 Générer PDF</button>
+          <button id="btnClosePreview" type="button">✕ Fermer</button>
+        </div>
+      </div>
+      <div id="posterPreviewWrap">
+        <iframe id="posterPreviewFrame" frameborder="0" scrolling="no"></iframe>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // =========================
-    // Constantes
-    // =========================
-    var SITE_URL_FIXED = 'mediathequesdugolfe.bzh';
+  // =========================
+  // Constantes
+  // =========================
+  var SITE_URL_FIXED = 'mediathequesdugolfe.bzh';
+  var APP_VERSION = 'v1.0.0';
 
-    var KEYS = {
-      logoMediatheque: 'med_logo_mediatheque',
-      logoGmva: 'med_logo_gmva',
-      fontRias: 'med_font_rias',
-      fontRobotoBold: 'med_font_roboto_bold',
-      fontVagRounded: 'med_font_vag_rounded'
-    };
+  var KEYS = {
+    logoMediatheque: 'med_logo_mediatheque',
+    logoGmva: 'med_logo_gmva',
+    fontRias: 'med_font_rias',
+    fontRobotoBold: 'med_font_roboto_bold',
+    fontVagRounded: 'med_font_vag_rounded'
+  };
 
-    var CONTACT_PRESETS = {
-      SARZEAU: 'Médiathèque de Sarzeau - 02 97 48 29 42',
-      ST_GILDAS: 'Médiathèque de Saint-Gildas de Rhuys - 02 97 48 29 41',
-      ST_ARMEL: 'Médiathèque de Saint-Armel - 02 97 48 29 49'
-    };
+  var CONTACT_PRESETS = {
+    SARZEAU: 'Médiathèque de Sarzeau - 02 97 48 29 42',
+    ST_GILDAS: 'Médiathèque de Saint-Gildas de Rhuys - 02 97 48 29 41',
+    ST_ARMEL: 'Médiathèque de Saint-Armel - 02 97 48 29 49'
+  };
 
-    var lastPdfUrl = '';
+  // Données d'images en mémoire (non exportées dans JSON sauf si voulu)
+  var _mainImageData = '';
+  var _footerLogo1Data = '';
+  var _footerLogo2Data = '';
 
-    function toDriveDownloadUrl(url) {
-      if (!url) return '';
-      var m = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-      return m ? ('https://drive.google.com/uc?export=download&id=' + m[1]) : url;
-    }
-
-    // =========================
-    // Tabs
-    // =========================
-    function setActiveTab(tabId) {
-      document.querySelectorAll('.tab-btn').forEach(function(btn){
-        btn.classList.toggle('active', btn.dataset.tab === tabId);
-      });
-      document.querySelectorAll('.tab-panel').forEach(function(p){
-        p.classList.toggle('active', p.id === tabId);
-      });
-    }
-    document.querySelectorAll('.tab-btn').forEach(function(btn){
-      btn.addEventListener('click', function(){ setActiveTab(btn.dataset.tab); });
+  // =========================
+  // Tabs
+  // =========================
+  function setActiveTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+      btn.classList.toggle('active', btn.dataset.tab === tabId);
     });
-
-    // =========================
-    // Config toggle
-    // =========================
-    function toggleConfig() {
-      var body = document.getElementById('configBody');
-      var arrow = document.getElementById('toggleArrow');
-      var hidden = body.classList.toggle('hidden');
-      arrow.innerHTML = hidden ? '&#9654;' : '&#9660;';
-    }
-
-    // =========================
-    // Helpers
-    // =========================
-    function setStatus(msg){ document.getElementById('status').textContent = msg || ''; }
-
-    function updateFooterLogoStates(){
-      var id1 = (document.getElementById('footerLogo1Id').value || '').trim();
-      var id2 = (document.getElementById('footerLogo2Id').value || '').trim();
-      document.getElementById('footerLogo1State').textContent = id1 ? 'Logo 1 : OK' : 'Logo 1 : aucun';
-      document.getElementById('footerLogo2State').textContent = id2 ? 'Logo 2 : OK' : 'Logo 2 : aucun';
-    }
-
-
-    function ensureFontStyle(id){
-      var existing = document.getElementById(id);
-      if (existing) return existing;
-      var el = document.createElement('style');
-      el.id = id;
-      document.head.appendChild(el);
-      return el;
-    }
-
-    function applyFontFace(styleId, familyName, dataUrl){
-      var el = ensureFontStyle(styleId);
-      el.textContent = dataUrl
-        ? '@font-face { font-family: "' + familyName + '"; font-style: normal; font-weight: 700; src: url(' + dataUrl + '); }'
-        : '';
-    }
-
-    // =========================
-    // Logos / fonts previews
-    // =========================
-    function loadLogoPreview(storageKey, wrapId, imgId, statusId){
-      var data = localStorage.getItem(storageKey);
-      var wrap = document.getElementById(wrapId);
-      var img = document.getElementById(imgId);
-      var status = document.getElementById(statusId);
-      if (data){
-        wrap.style.display = 'block';
-        img.src = data;
-        status.textContent = 'OK';
-        status.className = 'config-status ok';
-      } else {
-        wrap.style.display = 'none';
-        img.src = '';
-        status.textContent = 'Non configuré';
-        status.className = 'config-status missing';
-      }
-    }
-
-    function setupLogoUpload(inputId, storageKey, wrapId, imgId, statusId){
-      var input = document.getElementById(inputId);
-      input.addEventListener('change', function(){
-        var file = input.files && input.files[0];
-        if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function(){
-          localStorage.setItem(storageKey, reader.result);
-          loadLogoPreview(storageKey, wrapId, imgId, statusId);
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    function loadFontPreview(storageKey, previewId, statusId, styleId, familyName){
-      var data = localStorage.getItem(storageKey);
-      var preview = document.getElementById(previewId);
-      var status = document.getElementById(statusId);
-      if (data){
-        preview.style.display = 'block';
-        status.textContent = 'OK';
-        status.className = 'config-status ok';
-        applyFontFace(styleId, familyName, data);
-      } else {
-        preview.style.display = 'none';
-        status.textContent = 'Non configuré';
-        status.className = 'config-status missing';
-        applyFontFace(styleId, familyName, '');
-      }
-    }
-
-    function setupFontUpload(inputId, storageKey, previewId, statusId, styleId, familyName){
-      var input = document.getElementById(inputId);
-      input.addEventListener('change', function(){
-        var file = input.files && input.files[0];
-        if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function(){
-          localStorage.setItem(storageKey, reader.result);
-          loadFontPreview(storageKey, previewId, statusId, styleId, familyName);
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    function initAllPreviews(){
-      loadLogoPreview(KEYS.logoMediatheque,'previewMediathequeWrap','imgPreviewMediatheque','statusMediatheque');
-      loadLogoPreview(KEYS.logoGmva,'previewGMVAWrap','imgPreviewGMVA','statusGMVA');
-      loadFontPreview(KEYS.fontRias,'previewFontRias','statusFontRias','styleFontRias','Rias');
-      loadFontPreview(KEYS.fontRobotoBold,'previewFontRobotoBold','statusFontRobotoBold','styleFontRoboto','Roboto');
-      loadFontPreview(KEYS.fontVagRounded,'previewFontVagRounded','statusFontVagRounded','styleFontVag','VAG Rounded Std');
-    }
-
-    function clearAll(){
-      Object.values(KEYS).forEach(function(k){ localStorage.removeItem(k); });
-      initAllPreviews();
-    }
-
-    setupLogoUpload('uploadLogoMediatheque',KEYS.logoMediatheque,'previewMediathequeWrap','imgPreviewMediatheque','statusMediatheque');
-    setupLogoUpload('uploadLogoGMVA',KEYS.logoGmva,'previewGMVAWrap','imgPreviewGMVA','statusGMVA');
-    setupFontUpload('uploadFontRias',KEYS.fontRias,'previewFontRias','statusFontRias','styleFontRias','Rias');
-    setupFontUpload('uploadFontRobotoBold',KEYS.fontRobotoBold,'previewFontRobotoBold','statusFontRobotoBold','styleFontRoboto','Roboto');
-    setupFontUpload('uploadFontVagRounded',KEYS.fontVagRounded,'previewFontVagRounded','statusFontVagRounded','styleFontVag','VAG Rounded Std');
-
-    initAllPreviews();
-
-    // =========================
-    // Infos -> extraction dernière ligne (si contactLine vide)
-    // =========================
-    var _extractLock = false;
-
-    function syncPresetFromContactLine(){
-      var v = (document.getElementById('contactLine').value || '').trim();
-      var sel = document.getElementById('contactPreset');
-      if (!v){ sel.value = 'SARZEAU'; return; }
-
-      var matchKey = null;
-      Object.keys(CONTACT_PRESETS).forEach(function(k){
-        if (CONTACT_PRESETS[k] === v) matchKey = k;
-      });
-      sel.value = matchKey ? matchKey : 'CUSTOM';
-    }
-
-    function extractContactFromInfos(){
-      if (_extractLock) return;
-      _extractLock = true;
-      try{
-        var ta = document.getElementById('infos');
-        var out = document.getElementById('contactLine');
-        if ((out.value || '').trim()) return;
-
-        var lines = String(ta.value || '').split(/\r?\n/);
-        while (lines.length && lines[lines.length-1].trim() === '') lines.pop();
-        if (!lines.length){ out.value=''; ta.value=''; return; }
-
-        var last = (lines[lines.length-1] || '').trim();
-        if (!last) return;
-
-        if (!/M[ée]diath[èe]que/i.test(last) && !/\b02\s?\d{2}/.test(last)) return;
-
-        lines.pop();
-        while (lines.length && lines[lines.length-1].trim() === '') lines.pop();
-
-        out.value = last;
-        ta.value = lines.join('\n');
-
-        syncPresetFromContactLine();
-      } finally {
-        _extractLock = false;
-      }
-    }
-
-    document.getElementById('infos').addEventListener('blur', extractContactFromInfos);
-
-    // =========================
-    // Presets contact
-    // =========================
-    document.getElementById('contactPreset').addEventListener('change', function(){
-      var sel = document.getElementById('contactPreset').value;
-      if (sel === 'CUSTOM') return;
-      document.getElementById('contactLine').value = CONTACT_PRESETS[sel] || '';
+    document.querySelectorAll('.tab-panel').forEach(function(p) {
+      p.classList.toggle('active', p.id === tabId);
     });
+  }
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() { setActiveTab(btn.dataset.tab); });
+  });
 
-    document.getElementById('contactLine').addEventListener('input', syncPresetFromContactLine);
+  // =========================
+  // Config toggle
+  // =========================
+  function toggleConfig() {
+    var body = document.getElementById('configBody');
+    var arrow = document.getElementById('toggleArrow');
+    var hidden = body.classList.toggle('hidden');
+    arrow.innerHTML = hidden ? '&#9654;' : '&#9660;';
+  }
 
-    // =========================
-    // Historique
-    // =========================
-    function loadHistory(){
-      google.script.run.withSuccessHandler(function(res){
-        var entries = [];
-        try{ entries = JSON.parse(res) || []; } catch(e){ entries = []; }
-        renderHistory(entries);
-      }).withFailureHandler(function(err){
-        setStatus('Erreur serveur : ' + (err && err.message ? err.message : err));
-      }).listPosterEntries();
+  // =========================
+  // Helpers
+  // =========================
+  function setStatus(msg) { document.getElementById('status').textContent = msg || ''; }
+  function setIoStatus(msg) { document.getElementById('ioStatus').textContent = msg || ''; }
+
+  function readFileAsDataUrl(file) {
+    return new Promise(function(resolve, reject) {
+      if (!file) { resolve(''); return; }
+      var reader = new FileReader();
+      reader.onload = function() { resolve(reader.result); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function updateMainImageState() {
+    var el = document.getElementById('mainImageState');
+    if (_mainImageData) {
+      el.style.display = 'inline-block';
+      el.textContent = 'Image chargée ✓';
+      el.className = 'logo-state ok';
+    } else {
+      el.style.display = 'none';
     }
+  }
 
-    function renderHistory(entries){
-      var root = document.getElementById('historyContent');
-      if (!entries || !entries.length){
-        root.innerHTML = '<div class="small">Aucune entrée.</div>';
-        return;
-      }
+  function updateFooterLogoStates() {
+    var s1 = document.getElementById('footerLogo1State');
+    var s2 = document.getElementById('footerLogo2State');
+    s1.textContent = _footerLogo1Data ? 'Logo 1 : OK ✓' : 'Aucun';
+    s1.className = _footerLogo1Data ? 'logo-state ok' : 'logo-state';
+    s2.textContent = _footerLogo2Data ? 'Logo 2 : OK ✓' : 'Aucun';
+    s2.className = _footerLogo2Data ? 'logo-state ok' : 'logo-state';
+  }
 
-      var html = '<div class="history-list">';
-      html += entries.map(function(it){
-        var title = (it.title || '').trim();
-        var t2 = (it.titleLine2 || '').trim();
-        var fullTitle = (t2 ? (title + ' ' + t2) : title) || '(sans titre)';
-        var upd = (it.updatedAt || it.createdAt || '').toString();
-        var dates = (it.dates || '').toString();
-        var meta = [upd, dates].filter(Boolean).join(' • ');
-        var pdf = it.pdfUrl || '';
+  // File inputs -> memory
+  document.getElementById('mainImage').addEventListener('change', async function() {
+    var f = this.files && this.files[0];
+    _mainImageData = f ? await readFileAsDataUrl(f) : '';
+    updateMainImageState();
+  });
+  document.getElementById('footerLogo1').addEventListener('change', async function() {
+    var f = this.files && this.files[0];
+    _footerLogo1Data = f ? await readFileAsDataUrl(f) : '';
+    updateFooterLogoStates();
+  });
+  document.getElementById('footerLogo2').addEventListener('change', async function() {
+    var f = this.files && this.files[0];
+    _footerLogo2Data = f ? await readFileAsDataUrl(f) : '';
+    updateFooterLogoStates();
+  });
 
-        return '' +
-          '<div class="history-row">' +
-            '<div class="history-main">' +
-              '<div class="history-title">' + fullTitle.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
-              '<div class="history-meta">' + meta.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' +
-            '</div>' +
-            '<div class="history-actions">' +
-              (pdf ? '<a class="chip" href="' + pdf + '" target="_blank" rel="noopener">Visualiser le PDF</a>' : '') +
-              '<button class="chip primary" type="button" data-action="edit" data-id="' + (it.id || '') + '">Modifier</button>' +
-              '<button class="chip danger" type="button" data-action="delete" data-id="' + (it.id || '') + '">Supprimer affiche</button>' +
-            '</div>' +
-          '</div>';
-      }).join('');
-      html += '</div>';
+  document.getElementById('btnClearFooterLogo1').addEventListener('click', function() {
+    _footerLogo1Data = '';
+    document.getElementById('footerLogo1').value = '';
+    updateFooterLogoStates();
+  });
+  document.getElementById('btnClearFooterLogo2').addEventListener('click', function() {
+    _footerLogo2Data = '';
+    document.getElementById('footerLogo2').value = '';
+    updateFooterLogoStates();
+  });
 
-      root.innerHTML = html;
+  function ensureFontStyle(id) {
+    var existing = document.getElementById(id);
+    if (existing) return existing;
+    var el = document.createElement('style');
+    el.id = id;
+    document.head.appendChild(el);
+    return el;
+  }
 
-      root.querySelectorAll('button[data-action][data-id]').forEach(function(btn){
-        btn.addEventListener('click', function(){
-          var id = btn.getAttribute('data-id');
-          var action = btn.getAttribute('data-action');
+  function applyFontFace(styleId, familyName, dataUrl) {
+    var el = ensureFontStyle(styleId);
+    el.textContent = dataUrl
+      ? '@font-face { font-family: "' + familyName + '"; font-style: normal; font-weight: 700; src: url(' + dataUrl + '); }'
+      : '';
+  }
 
-          if (action === 'edit'){
-            var entry = entries.find(function(e){ return (e.id || '') === id; });
-            if (entry){
-              loadEntryIntoForm(entry);
-              setActiveTab('tabEditor');
-              setStatus('Entrée chargée : ' + (entry.id || ''));
-            }
-            return;
-          }
-
-          if (action === 'delete'){
-            if (!confirm('Supprimer cette affiche (PDF + historique) ?')) return;
-
-            google.script.run.withSuccessHandler(function(res){
-              try{
-                var out = JSON.parse(res);
-                if (out && out.ok){
-                  if ((document.getElementById('entryId').value || '') === id) resetForm();
-                  loadHistory();
-                  setStatus('Affiche supprimée.');
-                } else {
-                  setStatus('Suppression impossible.');
-                }
-              } catch(e){
-                setStatus('Erreur : ' + e);
-              }
-            }).withFailureHandler(function(err){
-              setStatus('Erreur serveur : ' + (err && err.message ? err.message : err));
-            }).deletePosterEntry(id);
-          }
-        });
-      });
+  // =========================
+  // Logos / polices (localStorage)
+  // =========================
+  function loadLogoPreview(storageKey, wrapId, imgId, statusId) {
+    var data = localStorage.getItem(storageKey);
+    var wrap = document.getElementById(wrapId);
+    var img = document.getElementById(imgId);
+    var status = document.getElementById(statusId);
+    if (data) {
+      wrap.style.display = 'block';
+      img.src = data;
+      status.textContent = 'OK';
+      status.className = 'config-status ok';
+    } else {
+      wrap.style.display = 'none';
+      img.src = '';
+      status.textContent = 'Non configuré';
+      status.className = 'config-status missing';
     }
+  }
 
-    function loadEntryIntoForm(it){
-      document.getElementById('entryId').value = it.id || '';
-      document.getElementById('title').value = it.title || '';
-      document.getElementById('titleLine2').value = it.titleLine2 || '';
-      document.getElementById('subtitle').value = it.subtitle || '';
-      document.getElementById('dates').value = it.dates || '';
-      document.getElementById('infos').value = it.infos || '';
-      document.getElementById('publicCible').value = it.publicCible || '';
-
-      document.getElementById('footerLogo1Id').value = it.footerLogo1Id || '';
-      document.getElementById('footerLogo2Id').value = it.footerLogo2Id || '';
-      document.getElementById('footerLogo1').value = '';
-      document.getElementById('footerLogo2').value = '';
-      updateFooterLogoStates();
-
-
-      document.getElementById('contactLine').value = it.contactLine || '';
-      document.getElementById('showContactLine').checked = (String(it.showContactLine).toLowerCase() === 'true' || it.showContactLine === true);
-      syncPresetFromContactLine();
-
-      lastPdfUrl = it.pdfUrl || '';
-      document.getElementById('btnDownload').disabled = !lastPdfUrl;
+  function loadFontPreview(storageKey, previewId, statusId, styleId, familyName) {
+    var data = localStorage.getItem(storageKey);
+    var preview = document.getElementById(previewId);
+    var status = document.getElementById(statusId);
+    if (data) {
+      applyFontFace(styleId, familyName, data);
+      preview.style.display = 'block';
+      status.textContent = 'OK';
+      status.className = 'config-status ok';
+    } else {
+      applyFontFace(styleId, familyName, '');
+      preview.style.display = 'none';
+      status.textContent = 'Non configuré';
+      status.className = 'config-status missing';
     }
+  }
 
-    document.getElementById('refreshHistory').addEventListener('click', loadHistory);
-
-    // =========================
-    // Génération PDF
-    // =========================
-    function readFileAsDataUrl(file){
-      return new Promise(function(resolve, reject){
-        if (!file){ resolve(''); return; }
-        var reader = new FileReader();
-        reader.onload = function(){ resolve(reader.result); };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    async function generatePdf(){
-      setStatus('Préparation...');
-      extractContactFromInfos();
-
-      var entryId = (document.getElementById('entryId').value || '').trim();
-      if (entryId){
-        var choix = prompt(
-          "Cette affiche existe déjà.\n\n" +
-          "1 — Écraser l'ancienne version\n" +
-          "2 — Créer une nouvelle affiche\n\n" +
-          "Tapez 1 ou 2 :"
-        );
-        if (choix === '2') entryId = '';
-        else if (choix !== '1') return;
-      }
-
-      var fileInput = document.getElementById('mainImage');
-      var file = fileInput.files && fileInput.files[0];
-
-      if (!file && !entryId){
-        setStatus("Image obligatoire pour une nouvelle affiche.");
-        return;
-      }
-
-      var payload = {
-        entryId: entryId,
-
-        title: (document.getElementById('title').value || '').trim(),
-        titleLine2: (document.getElementById('titleLine2').value || '').trim(),
-        subtitle: (document.getElementById('subtitle').value || '').trim(),
-        dates: (document.getElementById('dates').value || '').trim(),
-        infos: (document.getElementById('infos').value || '').trim(),
-
-        showContactLine: !!document.getElementById('showContactLine').checked,
-        contactLine: (document.getElementById('contactLine').value || '').trim(),
-
-        publicCible: (document.getElementById('publicCible').value || '').trim(),
-
-        siteUrl: SITE_URL_FIXED,
-
-        mainImage: file ? await readFileAsDataUrl(file) : '',
-
-        footerLogo1: (document.getElementById('footerLogo1').files && document.getElementById('footerLogo1').files[0]) ? await readFileAsDataUrl(document.getElementById('footerLogo1').files[0]) : '',
-        footerLogo2: (document.getElementById('footerLogo2').files && document.getElementById('footerLogo2').files[0]) ? await readFileAsDataUrl(document.getElementById('footerLogo2').files[0]) : '',
-        footerLogo1Id: (document.getElementById('footerLogo1Id').value || '').trim(),
-        footerLogo2Id: (document.getElementById('footerLogo2Id').value || '').trim(),
-
-
-        topLogo: localStorage.getItem(KEYS.logoMediatheque) || '',
-        bottomLogo: localStorage.getItem(KEYS.logoGmva) || '',
-        fontRias: localStorage.getItem(KEYS.fontRias) || '',
-        fontRobotoBold: localStorage.getItem(KEYS.fontRobotoBold) || '',
-        fontVagRounded: localStorage.getItem(KEYS.fontVagRounded) || ''
+  function setupLogoUpload(inputId, storageKey, wrapId, imgId, statusId) {
+    var input = document.getElementById(inputId);
+    input.addEventListener('change', function() {
+      var file = input.files && input.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function() {
+        localStorage.setItem(storageKey, reader.result);
+        loadLogoPreview(storageKey, wrapId, imgId, statusId);
       };
+      reader.readAsDataURL(file);
+    });
+  }
 
-      if (!payload.title){
-        setStatus('Titre obligatoire.');
-        return;
-      }
+  function setupFontUpload(inputId, storageKey, previewId, statusId, styleId, familyName) {
+    var input = document.getElementById(inputId);
+    input.addEventListener('change', function() {
+      var file = input.files && input.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function() {
+        localStorage.setItem(storageKey, reader.result);
+        loadFontPreview(storageKey, previewId, statusId, styleId, familyName);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 
-      setStatus('Génération PDF...');
-      google.script.run
-        .withSuccessHandler(function(res){
-          try{
-            var out = JSON.parse(res);
-            if (out && out.ok){
-              document.getElementById('entryId').value = out.entryId || '';
-              setStatus('OK : ' + (out.fileName || 'PDF généré'));
-              loadHistory();
+  function initAllPreviews() {
+    loadLogoPreview(KEYS.logoMediatheque, 'previewMediathequeWrap', 'imgPreviewMediatheque', 'statusMediatheque');
+    loadLogoPreview(KEYS.logoGmva, 'previewGMVAWrap', 'imgPreviewGMVA', 'statusGMVA');
+    loadFontPreview(KEYS.fontRias, 'previewFontRias', 'statusFontRias', 'styleFontRias', 'Rias');
+    loadFontPreview(KEYS.fontRobotoBold, 'previewFontRobotoBold', 'statusFontRobotoBold', 'styleFontRoboto', 'Roboto');
+    loadFontPreview(KEYS.fontVagRounded, 'previewFontVagRounded', 'statusFontVagRounded', 'styleFontVag', 'VAG Rounded Std');
+  }
 
-              lastPdfUrl = out.pdfUrl || '';
+  function clearAll() {
+    Object.values(KEYS).forEach(function(k) { localStorage.removeItem(k); });
+    initAllPreviews();
+  }
 
-              document.getElementById('footerLogo1Id').value = out.footerLogo1Id || document.getElementById('footerLogo1Id').value || '';
-              document.getElementById('footerLogo2Id').value = out.footerLogo2Id || document.getElementById('footerLogo2Id').value || '';
-              document.getElementById('footerLogo1').value = '';
-              document.getElementById('footerLogo2').value = '';
-              updateFooterLogoStates();
+  setupLogoUpload('uploadLogoMediatheque', KEYS.logoMediatheque, 'previewMediathequeWrap', 'imgPreviewMediatheque', 'statusMediatheque');
+  setupLogoUpload('uploadLogoGMVA', KEYS.logoGmva, 'previewGMVAWrap', 'imgPreviewGMVA', 'statusGMVA');
+  setupFontUpload('uploadFontRias', KEYS.fontRias, 'previewFontRias', 'statusFontRias', 'styleFontRias', 'Rias');
+  setupFontUpload('uploadFontRobotoBold', KEYS.fontRobotoBold, 'previewFontRobotoBold', 'statusFontRobotoBold', 'styleFontRoboto', 'Roboto');
+  setupFontUpload('uploadFontVagRounded', KEYS.fontVagRounded, 'previewFontVagRounded', 'statusFontVagRounded', 'styleFontVag', 'VAG Rounded Std');
 
-              document.getElementById('btnDownload').disabled = !lastPdfUrl;
-            } else {
-              setStatus('Erreur : ' + ((out && out.error) ? out.error : 'réponse inattendue'));
-            }
-          } catch(e){
-            setStatus('Erreur : ' + e);
-          }
-        })
-        .withFailureHandler(function(err){
-          setStatus('Erreur serveur : ' + (err && err.message ? err.message : err));
-        })
-        .createPoster(JSON.stringify(payload));
+  initAllPreviews();
+
+  // =========================
+  // Extraction contact depuis Infos
+  // =========================
+  var _extractLock = false;
+
+  function syncPresetFromContactLine() {
+    var v = (document.getElementById('contactLine').value || '').trim();
+    var sel = document.getElementById('contactPreset');
+    if (!v) { sel.value = 'SARZEAU'; return; }
+    var matchKey = null;
+    Object.keys(CONTACT_PRESETS).forEach(function(k) {
+      if (CONTACT_PRESETS[k] === v) matchKey = k;
+    });
+    sel.value = matchKey ? matchKey : 'CUSTOM';
+  }
+
+  function extractContactFromInfos() {
+    if (_extractLock) return;
+    _extractLock = true;
+    try {
+      var ta = document.getElementById('infos');
+      var out = document.getElementById('contactLine');
+      if ((out.value || '').trim()) return;
+
+      var lines = String(ta.value || '').split(/\r?\n/);
+      while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
+      if (!lines.length) { out.value = ''; ta.value = ''; return; }
+
+      var last = (lines[lines.length - 1] || '').trim();
+      if (!last) return;
+      if (!/M[ée]diath[èe]que/i.test(last) && !/\b02\s?\d{2}/.test(last)) return;
+
+      lines.pop();
+      while (lines.length && lines[lines.length - 1].trim() === '') lines.pop();
+      out.value = last;
+      ta.value = lines.join('\n');
+      syncPresetFromContactLine();
+    } finally {
+      _extractLock = false;
     }
+  }
 
-    function resetForm(){
-      document.getElementById('entryId').value = '';
-      document.getElementById('mainImage').value = '';
-      document.getElementById('title').value = '';
-      document.getElementById('titleLine2').value = '';
-      document.getElementById('subtitle').value = '';
-      document.getElementById('dates').value = '';
-      document.getElementById('infos').value = '';
-      document.getElementById('publicCible').value = '';
+  document.getElementById('infos').addEventListener('blur', extractContactFromInfos);
+  document.getElementById('contactPreset').addEventListener('change', function() {
+    var sel = document.getElementById('contactPreset').value;
+    if (sel === 'CUSTOM') return;
+    document.getElementById('contactLine').value = CONTACT_PRESETS[sel] || '';
+  });
+  document.getElementById('contactLine').addEventListener('input', syncPresetFromContactLine);
 
-      document.getElementById('footerLogo1').value = '';
-      document.getElementById('footerLogo2').value = '';
-      document.getElementById('footerLogo1Id').value = '';
-      document.getElementById('footerLogo2Id').value = '';
-      updateFooterLogoStates();
+  // =========================
+  // Collecte des données du formulaire
+  // =========================
+  function collectPayload() {
+    extractContactFromInfos();
+    return {
+      title: (document.getElementById('title').value || '').trim(),
+      titleLine2: (document.getElementById('titleLine2').value || '').trim(),
+      subtitle: (document.getElementById('subtitle').value || '').trim(),
+      dates: (document.getElementById('dates').value || '').trim(),
+      infos: (document.getElementById('infos').value || '').trim(),
+      showContactLine: !!document.getElementById('showContactLine').checked,
+      contactLine: (document.getElementById('contactLine').value || '').trim(),
+      publicCible: (document.getElementById('publicCible').value || '').trim(),
+      siteUrl: SITE_URL_FIXED,
+      mainImage: _mainImageData,
+      footerLogo1: _footerLogo1Data,
+      footerLogo2: _footerLogo2Data,
+      topLogo: localStorage.getItem(KEYS.logoMediatheque) || '',
+      bottomLogo: localStorage.getItem(KEYS.logoGmva) || '',
+      fontRias: localStorage.getItem(KEYS.fontRias) || '',
+      fontRobotoBold: localStorage.getItem(KEYS.fontRobotoBold) || '',
+      fontVagRounded: localStorage.getItem(KEYS.fontVagRounded) || ''
+    };
+  }
 
-
-      document.getElementById('showContactLine').checked = true;
-      document.getElementById('contactPreset').value = 'SARZEAU';
-      document.getElementById('contactLine').value = CONTACT_PRESETS.SARZEAU;
-
-      lastPdfUrl = '';
-      document.getElementById('btnDownload').disabled = true;
-
-      setStatus('Formulaire réinitialisé.');
-    }
-
-    document.getElementById('btnGenerate').addEventListener('click', generatePdf);
-    document.getElementById('btnResetForm').addEventListener('click', resetForm);
-
-    document.getElementById('btnClearFooterLogo1').addEventListener('click', function(){
-      document.getElementById('footerLogo1').value = '';
-      document.getElementById('footerLogo1Id').value = '';
-      updateFooterLogoStates();
-    });
-    document.getElementById('btnClearFooterLogo2').addEventListener('click', function(){
-      document.getElementById('footerLogo2').value = '';
-      document.getElementById('footerLogo2Id').value = '';
-      updateFooterLogoStates();
-    });
-
-
-    document.getElementById('btnDownload').addEventListener('click', function(){
-      if (!lastPdfUrl) return;
-      window.open(toDriveDownloadUrl(lastPdfUrl), '_blank');
-    });
-
-    // init defaults
+  // =========================
+  // Reset formulaire
+  // =========================
+  function resetForm() {
+    document.getElementById('title').value = '';
+    document.getElementById('titleLine2').value = '';
+    document.getElementById('subtitle').value = '';
+    document.getElementById('dates').value = '';
+    document.getElementById('infos').value = '';
+    document.getElementById('publicCible').value = '';
+    document.getElementById('showContactLine').checked = true;
+    document.getElementById('contactPreset').value = 'SARZEAU';
     document.getElementById('contactLine').value = CONTACT_PRESETS.SARZEAU;
-    syncPresetFromContactLine();
-    loadHistory();
+    _mainImageData = '';
+    _footerLogo1Data = '';
+    _footerLogo2Data = '';
+    document.getElementById('mainImage').value = '';
+    document.getElementById('footerLogo1').value = '';
+    document.getElementById('footerLogo2').value = '';
+    updateMainImageState();
+    updateFooterLogoStates();
+    setStatus('Formulaire réinitialisé.');
+  }
+
+  document.getElementById('btnResetForm').addEventListener('click', resetForm);
+
+  // =========================
+  // Export / Import JSON
+  // =========================
+  document.getElementById('btnExportJson').addEventListener('click', function() {
+    var data = {
+      _version: APP_VERSION,
+      _exportedAt: new Date().toISOString(),
+      title: (document.getElementById('title').value || '').trim(),
+      titleLine2: (document.getElementById('titleLine2').value || '').trim(),
+      subtitle: (document.getElementById('subtitle').value || '').trim(),
+      dates: (document.getElementById('dates').value || '').trim(),
+      infos: (document.getElementById('infos').value || '').trim(),
+      showContactLine: !!document.getElementById('showContactLine').checked,
+      contactLine: (document.getElementById('contactLine').value || '').trim(),
+      publicCible: (document.getElementById('publicCible').value || '').trim(),
+      // Images : incluses en base64 pour portabilité complète
+      mainImage: _mainImageData,
+      footerLogo1: _footerLogo1Data,
+      footerLogo2: _footerLogo2Data
+    };
+
+    var filename = 'affiche';
+    if (data.title) {
+      filename = 'affiche-' + data.title.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+    }
+    if (data.dates) {
+      var m = data.dates.match(/\d{1,2}[\s\/\-\.]\d{1,2}[\s\/\-\.]?\d{0,4}/);
+      if (m) filename += '-' + m[0].replace(/[^0-9]/g, '-');
+    }
+
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    setIoStatus('Exporté : ' + filename + '.json');
+  });
+
+  document.getElementById('importJsonInput').addEventListener('change', function() {
+    var file = this.files && this.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        var data = JSON.parse(e.target.result);
+        // Remplir les champs texte
+        document.getElementById('title').value = data.title || '';
+        document.getElementById('titleLine2').value = data.titleLine2 || '';
+        document.getElementById('subtitle').value = data.subtitle || '';
+        document.getElementById('dates').value = data.dates || '';
+        document.getElementById('infos').value = data.infos || '';
+        document.getElementById('publicCible').value = data.publicCible || '';
+        document.getElementById('showContactLine').checked = (data.showContactLine !== false);
+        document.getElementById('contactLine').value = data.contactLine || CONTACT_PRESETS.SARZEAU;
+        syncPresetFromContactLine();
+
+        // Images
+        _mainImageData = data.mainImage || '';
+        _footerLogo1Data = data.footerLogo1 || '';
+        _footerLogo2Data = data.footerLogo2 || '';
+        updateMainImageState();
+        updateFooterLogoStates();
+
+        setIoStatus('Importé depuis : ' + file.name + (data._exportedAt ? ' (exporté le ' + data._exportedAt.substring(0,10) + ')' : ''));
+        setActiveTab('tabEditor');
+      } catch (err) {
+        setIoStatus('Erreur lors de l\'import : ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    // reset input pour permettre re-import du même fichier
+    this.value = '';
+  });
+
+  // =========================
+  // Construction HTML de l'affiche (identique au GAS)
+  // =========================
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function buildPosterHtml(data) {
+    var topLogo    = data.topLogo    || '';
+    var bottomLogo = data.bottomLogo || '';
+    var mainImage  = data.mainImage  || '';
+    var footerLogo1 = data.footerLogo1 || '';
+    var footerLogo2 = data.footerLogo2 || '';
+
+    var title1 = (data.title || '').trim();
+    var title2 = (data.titleLine2 || '').trim();
+    var titleText = [title1, title2].filter(function(v) { return v; }).join('\n');
+
+    var subtitle = (data.subtitle || '').trim();
+    var description = (data.description || '').trim();
+    var subtitleText = [subtitle, description].filter(function(v) { return v; }).join('\n');
+
+    var datesText = (data.dates || '').trim();
+
+    var infosText = (data.infos || '').trim();
+    var contactLine = (data.contactLine || '').trim();
+    var showContactLine = (data.showContactLine === true) || (String(data.showContactLine).toLowerCase() === 'true');
+
+    var infosRender = infosText;
+    if (showContactLine && contactLine) {
+      infosRender = [infosText, contactLine].filter(function(v) { return v && String(v).trim(); }).join('\n');
+    }
+
+    var siteUrl = (data.siteUrl || '').trim();
+
+    var publicLines = (data.publicCible || '')
+      .split(/\r?\n/)
+      .map(function(l) { return (l || '').trim(); })
+      .filter(function(l) { return l; })
+      .slice(0, 2);
+
+    var hasTitleLine2 = !!title2;
+    var isPublicSingleLine = publicLines.length <= 1;
+
+    var ff = '';
+    if (data.fontRias) ff += '@font-face{font-family:"Rias";src:url("' + data.fontRias + '");font-weight:700;font-style:normal}';
+    if (data.fontRobotoBold) ff += '@font-face{font-family:"Roboto";src:url("' + data.fontRobotoBold + '");font-weight:700;font-style:normal}';
+    if (data.fontVagRounded) ff += '@font-face{font-family:"VAG Rounded Std";src:url("' + data.fontVagRounded + '");font-weight:700;font-style:normal}';
+
+    var PURPLE = '#786fb2';
+    var BLACK  = '#231F20';
+
+    var FRAME_LEFT = '12.855mm', FRAME_TOP = '9.083mm', FRAME_WIDTH = '274.290mm', FRAME_HEIGHT = '379.447mm';
+
+    var BAND_LEFT   = '22.893mm';
+    var BAND_TOP    = hasTitleLine2 ? '239.600mm' : '249.766mm';
+    var BAND_WIDTH  = '236.345mm';
+    var BAND_HEIGHT = hasTitleLine2 ? '108.174mm' : '98.007mm';
+
+    var TEXT_LEFT = '29.014mm';
+    var TEXT_TOP  = hasTitleLine2 ? '264.834mm' : '275.768mm';
+    var TEXT_WIDTH = '210.000mm';
+
+    var TRI_LEFT = isPublicSingleLine ? '203.849mm' : '209.327mm';
+    var TRI_TOP  = isPublicSingleLine ? '213.074mm' : '225.292mm';
+    var TRI_W    = isPublicSingleLine ? '68.387mm'  : '60.484mm';
+    var TRI_H    = isPublicSingleLine ? '64.918mm'  : '57.416mm';
+    TRI_TOP = (parseFloat(TRI_TOP) + 8).toFixed(3) + 'mm';
+
+    var URLBAR_LEFT = '22.974mm', URLBAR_W = '120.300mm', URLBAR_H = '13.678mm';
+    var URLTRI_LEFT = '49.492mm', URLTRI_W = '8.227mm', URLTRI_H = '8.585mm';
+    var URLTEXT_LEFT = '32.838mm';
+
+    var BOTTOM_WEDGE_LEFT = '12.855mm', BOTTOM_WEDGE_TOP = '388.437mm', BOTTOM_WEDGE_W = '274.290mm', BOTTOM_WEDGE_H = '52.563mm';
+    var BOTTOM_LOGO_LEFT = '209.500mm', BOTTOM_LOGO_TOP = '368.500mm', BOTTOM_LOGO_W = '77.645mm', BOTTOM_LOGO_H = '50.000mm';
+
+    var FOOTER_BULLET_LEFT = '14.15mm', FOOTER_BULLET_TOP = '394.40mm';
+    var FOOTER_TEXT_LEFT = '18.10mm', FOOTER_TEXT_TOP = '393.60mm';
+
+    var FOOTER_LOGO1_LEFT_MM = 18.10, FOOTER_LOGO_TOP_MM = 401.20;
+    var FOOTER_LOGO_W_MM = 16.00, FOOTER_LOGO_H_MM = 16.00, FOOTER_LOGO_GAP_MM = 2.50;
+    var FOOTER_LOGO1_LEFT = FOOTER_LOGO1_LEFT_MM.toFixed(2) + 'mm';
+    var FOOTER_LOGO2_LEFT = (FOOTER_LOGO1_LEFT_MM + FOOTER_LOGO_W_MM + FOOTER_LOGO_GAP_MM).toFixed(2) + 'mm';
+    var FOOTER_LOGO_TOP = FOOTER_LOGO_TOP_MM.toFixed(2) + 'mm';
+    var FOOTER_LOGO_W = FOOTER_LOGO_W_MM.toFixed(2) + 'mm';
+    var FOOTER_LOGO_H = FOOTER_LOGO_H_MM.toFixed(2) + 'mm';
+
+    var BAND_BOTTOM_MM = parseFloat(BAND_TOP) + parseFloat(BAND_HEIGHT);
+    var URLBAR_TOP   = BAND_BOTTOM_MM.toFixed(3) + 'mm';
+    var URLTEXT_TOP  = (BAND_BOTTOM_MM + 1.567).toFixed(3) + 'mm';
+    var URLTRI_TOP   = (BAND_BOTTOM_MM + 11.601).toFixed(3) + 'mm';
+
+    var ORIG_BAND_TOP_MM   = parseFloat(BAND_TOP);
+    var ORIG_TEXT_TOP_MM   = parseFloat(TEXT_TOP);
+    var ORIG_TRI_TOP_MM    = parseFloat(TRI_TOP);
+    var BASE_HEADROOM_MM   = ORIG_TEXT_TOP_MM - ORIG_BAND_TOP_MM;
+    var BASE_TRI_OFFSET_MM = ORIG_TRI_TOP_MM  - ORIG_BAND_TOP_MM;
+
+    var SUBTITLE_MT = 3.970, DATES_MT = 6.310, INFOS_MT = 1.000;
+    var URL_SAFE_GAP_MM = 2.0, MAX_BOTTOM_GAP_MM = 0.0, PREF_BOTTOM_GAP_MM = 0.0;
+
+    function estLines_(txt, charsPerLine) {
+      if (!txt) return 0;
+      return String(txt).split(/\r?\n/).reduce(function(sum, p) {
+        p = (p || '').trim();
+        return sum + Math.max(1, Math.ceil(((p.length || 1)) / charsPerLine));
+      }, 0);
+    }
+
+    function computeNeedMM_() {
+      var titleLines = estLines_(titleText, 24);
+      var subLines   = estLines_(subtitleText, 60);
+      var datesLines = estLines_(datesText, 34);
+      var infosLines = estLines_(infosRender, 60);
+      var needMM = 0;
+      needMM += titleLines * 11.0;
+      if (subtitleText) needMM += SUBTITLE_MT + subLines * 7.9;
+      if (datesText)    needMM += DATES_MT    + datesLines * 8.7;
+      if (infosRender)  needMM += INFOS_MT    + infosLines * 7.9;
+      needMM += 2.0;
+      return needMM;
+    }
+
+    var safeBottom   = parseFloat(URLBAR_TOP) - URL_SAFE_GAP_MM;
+    var need         = computeNeedMM_();
+    var targetBottom = Math.min(BAND_BOTTOM_MM - PREF_BOTTOM_GAP_MM, safeBottom);
+
+    if ((targetBottom - need) < ORIG_TEXT_TOP_MM - 0.1) {
+      SUBTITLE_MT = 2.000; DATES_MT = 0.000; INFOS_MT = 0.000;
+      need         = computeNeedMM_();
+      targetBottom = Math.min(BAND_BOTTOM_MM - PREF_BOTTOM_GAP_MM, safeBottom);
+    }
+
+    var minBottomAllowed = Math.min(BAND_BOTTOM_MM - MAX_BOTTOM_GAP_MM, safeBottom);
+    if (targetBottom < minBottomAllowed) targetBottom = minBottomAllowed;
+
+    var newTextTopMM = Math.min(ORIG_TEXT_TOP_MM, targetBottom - need);
+    TEXT_TOP = newTextTopMM.toFixed(3) + 'mm';
+
+    var newBandTopMM = Math.min(ORIG_BAND_TOP_MM, newTextTopMM - BASE_HEADROOM_MM);
+    BAND_TOP    = newBandTopMM.toFixed(3) + 'mm';
+    BAND_HEIGHT = (BAND_BOTTOM_MM - newBandTopMM).toFixed(3) + 'mm';
+    TRI_TOP     = (newBandTopMM + BASE_TRI_OFFSET_MM).toFixed(3) + 'mm';
+
+    var SUBTITLE_MT_S = SUBTITLE_MT.toFixed(3) + 'mm';
+    var DATES_MT_S    = DATES_MT.toFixed(3)    + 'mm';
+    var INFOS_MT_S    = INFOS_MT.toFixed(3)    + 'mm';
+
+    var audienceHtml = '';
+    if (publicLines.length) {
+      if (isPublicSingleLine) {
+        audienceHtml = '<div class="audience-text single">' + escapeHtml(publicLines[0]) + '</div>';
+      } else {
+        audienceHtml =
+          '<div class="audience-text double">' +
+            '<div class="audience-small">' + escapeHtml(publicLines[0]) + '</div>' +
+            '<div class="audience-big">'   + escapeHtml(publicLines[1]) + '</div>' +
+          '</div>';
+      }
+    }
+
+    var css =
+      '@page{size:A3 portrait;margin:0;}' +
+      'html,body{margin:0;padding:0;width:297mm;height:420mm;}' +
+      'body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#ffffff;}' +
+      '.poster{position:relative;width:297mm;height:420mm;overflow:hidden;background:#ffffff;}' +
+      '.frame{position:absolute;left:' + FRAME_LEFT + ';top:' + FRAME_TOP + ';width:' + FRAME_WIDTH + ';height:' + FRAME_HEIGHT + ';overflow:hidden;border:none;background:#fff;z-index:1;}' +
+      '.frame img{width:100%;height:100%;object-fit:cover;}' +
+      '.top-logo{position:absolute;left:38.779mm;top:10.562mm;width:54.379mm;height:86.729mm;object-fit:contain;z-index:5;}' +
+      '.violet-band{position:absolute;left:' + BAND_LEFT + ';top:' + BAND_TOP + ';width:' + BAND_WIDTH + ';height:' + BAND_HEIGHT + ';background:' + PURPLE + ';z-index:3;' +
+        'clip-path:polygon(0 0,100% 21%,100% 100%,0 100%);-webkit-clip-path:polygon(0 0,100% 21%,100% 100%,0 100%)}' +
+      '.band-content{position:absolute;left:' + TEXT_LEFT + ';top:' + TEXT_TOP + ';width:' + TEXT_WIDTH + ';z-index:6;}' +
+      '.title1{font-family:"Rias",cursive;font-size:37.716pt;font-weight:700;line-height:0.83;color:#ffffff;white-space:pre-line;}' +
+      '.subtitle{margin-top:' + SUBTITLE_MT_S + ';font-family:"VAG Rounded Std",sans-serif;font-size:18.858pt;font-weight:700;line-height:1.18;color:' + BLACK + ';white-space:pre-line;}' +
+      '.dates{margin-top:' + DATES_MT_S + ';font-family:"Roboto",sans-serif;font-size:23.131pt;font-weight:700;line-height:1.06;color:#ffffff;text-transform:uppercase;white-space:pre-line;}' +
+      '.infos{margin-top:' + INFOS_MT_S + ';font-family:"VAG Rounded Std",sans-serif;font-size:18.858pt;font-weight:700;line-height:1.18;color:' + BLACK + ';white-space:pre-line;}' +
+      '.audience-triangle{position:absolute;left:' + TRI_LEFT + ';top:' + TRI_TOP + ';width:' + TRI_W + ';height:' + TRI_H + ';background:#ffffff;z-index:7;' +
+        'clip-path:polygon(0 50%,100% 0,100% 100%);-webkit-clip-path:polygon(0 50%,100% 0,100% 100%)}' +
+      '.audience-text{position:absolute;left:' + TRI_LEFT + ';top:' + TRI_TOP + ';width:' + TRI_W + ';height:' + TRI_H + ';z-index:8;' +
+        'display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;' +
+        'font-family:"Roboto",sans-serif;font-weight:700;color:' + PURPLE + ';' +
+        'transform:translateX(' + (parseFloat(TRI_W) / 6).toFixed(3) + 'mm);}' +
+      '.audience-text.single{font-size:24pt;line-height:1.05;}' +
+      '.audience-text.double{line-height:1.05;}' +
+      '.audience-small{font-size:15.531pt;line-height:1.05;}' +
+      '.audience-big{font-size:24pt;line-height:1.05;}' +
+      '.url-bar{position:absolute;left:' + URLBAR_LEFT + ';top:' + URLBAR_TOP + ';width:' + URLBAR_W + ';height:' + URLBAR_H + ';background:' + BLACK + ';z-index:7;}' +
+      '.small-triangle{position:absolute;left:' + URLTRI_LEFT + ';top:' + URLTRI_TOP + ';width:' + URLTRI_W + ';height:' + URLTRI_H + ';background:' + PURPLE + ';z-index:8;' +
+        'clip-path:polygon(0 50%,100% 0,100% 100%);-webkit-clip-path:polygon(0 50%,100% 0,100% 100%)}' +
+      '.url-text{position:absolute;left:' + URLTEXT_LEFT + ';top:' + URLTEXT_TOP + ';z-index:9;font-family:"UniNeueBold","Roboto",sans-serif;font-size:23.369pt;font-weight:700;line-height:1;color:' + PURPLE + ';white-space:nowrap;}' +
+      '.bottom-wedge{position:absolute;left:' + BOTTOM_WEDGE_LEFT + ';top:' + BOTTOM_WEDGE_TOP + ';width:' + BOTTOM_WEDGE_W + ';height:' + BOTTOM_WEDGE_H + ';background:#fff;z-index:2;' +
+        'clip-path:polygon(0 40.1%,71.2% 40.1%,71.2% 0,100% 0,100% 100%,0 100%);' +
+        '-webkit-clip-path:polygon(0 40.1%,71.2% 40.1%,71.2% 0,100% 0,100% 100%,0 100%)}' +
+      '.bottom-logo{position:absolute;left:' + BOTTOM_LOGO_LEFT + ';top:' + BOTTOM_LOGO_TOP + ';width:' + BOTTOM_LOGO_W + ';height:' + BOTTOM_LOGO_H + ';object-fit:contain;object-position:center;z-index:3;}' +
+      '.footer-bullet{position:absolute;left:' + FOOTER_BULLET_LEFT + ';top:' + FOOTER_BULLET_TOP + ';width:0;height:0;' +
+        'border-top:1.6mm solid transparent;border-bottom:1.6mm solid transparent;border-left:2.2mm solid ' + BLACK + ';z-index:6;}' +
+      '.footer-text{position:absolute;left:' + FOOTER_TEXT_LEFT + ';top:' + FOOTER_TEXT_TOP + ';font-family:"Roboto",sans-serif;font-size:13.2pt;font-weight:700;color:' + BLACK + ';z-index:6;}' +
+      '.footer-logo{position:absolute;z-index:6;object-fit:contain;object-position:left top;}' +
+      '.footer-logo1{left:' + FOOTER_LOGO1_LEFT + ';top:' + FOOTER_LOGO_TOP + ';width:' + FOOTER_LOGO_W + ';height:' + FOOTER_LOGO_H + ';}' +
+      '.footer-logo2{left:' + FOOTER_LOGO2_LEFT + ';top:' + FOOTER_LOGO_TOP + ';width:' + FOOTER_LOGO_W + ';height:' + FOOTER_LOGO_H + ';}';
+
+    var html =
+      '<!doctype html>' +
+      '<html><head><meta charset="utf-8"><style>' + ff + css + '</style></head><body>' +
+      '<div class="poster">' +
+        '<div class="frame">' +
+          (mainImage ? '<img src="' + mainImage + '">' : '') +
+        '</div>' +
+        (topLogo ? '<img class="top-logo" src="' + topLogo + '">' : '') +
+        '<div class="violet-band"></div>' +
+        '<div class="band-content">' +
+          (titleText    ? '<div class="title1">'   + escapeHtml(titleText).replace(/\n/g, '<br>') + '</div>' : '') +
+          (subtitleText ? '<div class="subtitle">'  + escapeHtml(subtitleText).replace(/\n/g, '<br>') + '</div>' : '') +
+          (datesText    ? '<div class="dates">'     + escapeHtml(datesText).replace(/\n/g, '<br>') + '</div>' : '') +
+          (infosRender  ? '<div class="infos">'     + escapeHtml(infosRender).replace(/\n/g, '<br>') + '</div>' : '') +
+        '</div>' +
+        '<div class="audience-triangle"></div>' +
+        audienceHtml +
+        (siteUrl ? '<div class="url-bar"></div><div class="url-text">' + escapeHtml(siteUrl) + '</div>' : '') +
+        '<div class="small-triangle"></div>' +
+        '<div class="bottom-wedge"></div>' +
+        (bottomLogo ? '<img class="bottom-logo" src="' + bottomLogo + '">' : '') +
+        '<div class="footer-bullet"></div>' +
+        '<div class="footer-text">golfedumorbihan-vannesagglomeration.bzh</div>' +
+        (footerLogo1 ? '<img class="footer-logo footer-logo1" src="' + footerLogo1 + '">' : '') +
+        (footerLogo2 ? '<img class="footer-logo footer-logo2" src="' + footerLogo2 + '">' : '') +
+      '</div></body></html>';
+
+    return html;
+  }
+
+  // =========================
+  // Prévisualisation (modal)
+  // =========================
+  function openPreview() {
+    var payload = collectPayload();
+    if (!payload.title) { setStatus('Titre obligatoire pour la prévisualisation.'); return; }
+
+    var html = buildPosterHtml(payload);
+    var frame = document.getElementById('posterPreviewFrame');
+    var modal = document.getElementById('previewModal');
+
+    // Scale pour tenir dans la modale
+    var modalW = Math.min(window.innerWidth - 80, 860);
+    // A3 ratio = 297/420 ≈ 0.707
+    var scale = (modalW - 32) / 297;  // 297mm = page width
+    var previewW = Math.round(297 * scale);
+    var previewH = Math.round(420 * scale);
+
+    frame.style.width  = '297mm';
+    frame.style.height = '420mm';
+    frame.style.transform = 'scale(' + scale + ')';
+    frame.style.transformOrigin = 'top left';
+
+    document.getElementById('posterPreviewWrap').style.width  = previewW + 'px';
+    document.getElementById('posterPreviewWrap').style.height = previewH + 'px';
+    document.getElementById('posterPreviewWrap').style.overflow = 'hidden';
+
+    var doc = frame.contentDocument || frame.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+
+    modal.classList.add('open');
+    setStatus('');
+  }
+
+  document.getElementById('btnPreview').addEventListener('click', openPreview);
+  document.getElementById('btnClosePreview').addEventListener('click', function() {
+    document.getElementById('previewModal').classList.remove('open');
+  });
+  document.getElementById('previewModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+
+  // =========================
+  // Génération PDF (impression)
+  // =========================
+  function generatePdf() {
+    var payload = collectPayload();
+    if (!payload.title) { setStatus('Titre obligatoire pour générer le PDF.'); return; }
+    if (!payload.mainImage) { setStatus('Image principale obligatoire.'); return; }
+
+    setStatus('Ouverture de la fenêtre d\'impression...');
+
+    var html = buildPosterHtml(payload);
+    var win = window.open('', '_blank');
+    if (!win) {
+      setStatus('Impossible d\'ouvrir la fenêtre. Vérifiez les popups bloquées.');
+      return;
+    }
+
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+
+    // Attendre le chargement des images/polices avant d'imprimer
+    win.onload = function() {
+      setTimeout(function() {
+        win.focus();
+        win.print();
+        setStatus('Fenêtre d\'impression ouverte. Choisissez "Enregistrer en PDF" dans la boîte de dialogue.');
+      }, 500);
+    };
+  }
+
+  document.getElementById('btnPrint').addEventListener('click', generatePdf);
+  document.getElementById('btnPrintFromModal').addEventListener('click', function() {
+    document.getElementById('previewModal').classList.remove('open');
+    generatePdf();
+  });
+
+  // Init defaults
+  document.getElementById('contactLine').value = CONTACT_PRESETS.SARZEAU;
+  syncPresetFromContactLine();
+  updateFooterLogoStates();
   </script>
 </body>
 </html>
