@@ -71,15 +71,18 @@
     .modal-header h2 { margin: 0; font-size: 16px; }
     #btnClosePreview { background: #e9edf5; border-radius: 8px; padding: 6px 12px; font-size: 13px; font-weight: 700; border: 0; cursor: pointer; }
     #posterPreviewWrap {
-      width: 100%; overflow: auto;
-    }
-    /* The preview iframe */
-    #posterPreviewFrame {
+      width: 100%;
+      overflow: hidden;
+      position: relative;
       border: 1px solid #e1e1e1;
       border-radius: 8px;
+      background: #fff;
+    }
+    /* The preview iframe — taille A3 réelle, réduite par JS via transform */
+    #posterPreviewFrame {
       display: block;
-      width: 420px; /* A3 portrait scaled */
-      height: 594px;
+      border: none;
+      /* width/height/transform posés par JS à l'ouverture */
       transform-origin: top left;
     }
 
@@ -605,6 +608,57 @@
   document.getElementById('btnResetForm').addEventListener('click', resetForm);
 
   // =========================
+  // Nommage des fichiers : MED-AAAA-MM-JJ-TITRE
+  // =========================
+  var MONTHS_FR = {
+    'JANVIER':'01','FEVRIER':'02','MARS':'03','AVRIL':'04','MAI':'05','JUIN':'06',
+    'JUILLET':'07','AOUT':'08','SEPTEMBRE':'09','OCTOBRE':'10','NOVEMBRE':'11','DECEMBRE':'12'
+  };
+
+  function parseDateFromField(datesText) {
+    var s = String(datesText || '').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (!s) return '';
+
+    // Format ISO ou numérique : 2026-03-15 / 15/03/2026 / 15-03-2026
+    var m = s.match(/(20\d{2})[-\/\.](\d{1,2})[-\/\.](\d{1,2})/);
+    if (m) return m[1] + '-' + m[2].padStart(2,'0') + '-' + m[3].padStart(2,'0');
+
+    m = s.match(/(\d{1,2})[-\/\.](\d{1,2})[-\/\.](20\d{2})/);
+    if (m) return m[3] + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0');
+
+    // Format littéral : "15 MARS 2026" / "SAMEDI 15 MARS 2026"
+    m = s.match(/(\d{1,2})\s+(JANVIER|FEVRIER|MARS|AVRIL|MAI|JUIN|JUILLET|AOUT|SEPTEMBRE|OCTOBRE|NOVEMBRE|DECEMBRE)(?:\s+(20\d{2}))?/);
+    if (m) {
+      var yr = m[3] || String(new Date().getFullYear());
+      return yr + '-' + MONTHS_FR[m[2]] + '-' + m[1].padStart(2,'0');
+    }
+
+    return '';
+  }
+
+  function sanitizePart(str) {
+    return String(str || '')
+      .trim()
+      .toUpperCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^A-Z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 40);
+  }
+
+  function buildFilename() {
+    var title  = (document.getElementById('title').value || '').trim();
+    var title2 = (document.getElementById('titleLine2').value || '').trim();
+    var dates  = (document.getElementById('dates').value || '').trim();
+
+    var datePart  = parseDateFromField(dates) || 'DATE';
+    var titleFull = [title, title2].filter(Boolean).join(' ');
+    var titlePart = sanitizePart(titleFull) || 'AFFICHE';
+
+    return 'MED-' + datePart + '-' + titlePart;
+  }
+
+  // =========================
   // Export / Import JSON
   // =========================
   document.getElementById('btnExportJson').addEventListener('click', function() {
@@ -619,23 +673,12 @@
       showContactLine: !!document.getElementById('showContactLine').checked,
       contactLine: (document.getElementById('contactLine').value || '').trim(),
       publicCible: (document.getElementById('publicCible').value || '').trim(),
-      // Images : incluses en base64 pour portabilité complète
       mainImage: _mainImageData,
       footerLogo1: _footerLogo1Data,
       footerLogo2: _footerLogo2Data
     };
 
-    var filename = 'affiche';
-    if (data.title) {
-      filename = 'affiche-' + data.title.toLowerCase()
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
-    }
-    if (data.dates) {
-      var m = data.dates.match(/\d{1,2}[\s\/\-\.]\d{1,2}[\s\/\-\.]?\d{0,4}/);
-      if (m) filename += '-' + m[0].replace(/[^0-9]/g, '-');
-    }
-
+    var filename = buildFilename();
     var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
@@ -927,30 +970,36 @@
 
     var html = buildPosterHtml(payload);
     var frame = document.getElementById('posterPreviewFrame');
+    var wrap  = document.getElementById('posterPreviewWrap');
     var modal = document.getElementById('previewModal');
 
-    // Scale pour tenir dans la modale
-    var modalW = Math.min(window.innerWidth - 80, 860);
-    // A3 ratio = 297/420 ≈ 0.707
-    var scale = (modalW - 32) / 297;  // 297mm = page width
-    var previewW = Math.round(297 * scale);
-    var previewH = Math.round(420 * scale);
-
-    frame.style.width  = '297mm';
-    frame.style.height = '420mm';
-    frame.style.transform = 'scale(' + scale + ')';
-    frame.style.transformOrigin = 'top left';
-
-    document.getElementById('posterPreviewWrap').style.width  = previewW + 'px';
-    document.getElementById('posterPreviewWrap').style.height = previewH + 'px';
-    document.getElementById('posterPreviewWrap').style.overflow = 'hidden';
-
-    var doc = frame.contentDocument || frame.contentWindow.document;
-    doc.open();
-    doc.write(html);
-    doc.close();
-
     modal.classList.add('open');
+
+    // Mesure la largeur réelle disponible dans la modale après ouverture
+    requestAnimationFrame(function() {
+      var availW = wrap.clientWidth || 800;
+
+      // A3 portrait en pixels à 96 dpi : 297mm × (96/25.4) ≈ 1122 px  /  420mm ≈ 1587 px
+      var A3W_PX = Math.round(297 * 96 / 25.4);  // 1122
+      var A3H_PX = Math.round(420 * 96 / 25.4);  // 1587
+
+      var scale = availW / A3W_PX;
+      var scaledH = Math.round(A3H_PX * scale);
+
+      // L'iframe occupe la taille A3 réelle, le wrapper la taille réduite
+      frame.style.width  = A3W_PX + 'px';
+      frame.style.height = A3H_PX + 'px';
+      frame.style.transform = 'scale(' + scale + ')';
+      frame.style.transformOrigin = 'top left';
+
+      wrap.style.height = scaledH + 'px';
+
+      var doc = frame.contentDocument || frame.contentWindow.document;
+      doc.open();
+      doc.write(html);
+      doc.close();
+    });
+
     setStatus('');
   }
 
@@ -972,7 +1021,12 @@
 
     setStatus('Ouverture de la fenêtre d\'impression...');
 
+    var filename = buildFilename();
     var html = buildPosterHtml(payload);
+
+    // Injecter le titre dans le <head> du poster : le navigateur s'en sert comme nom de fichier PDF
+    html = html.replace('<meta charset="utf-8">', '<meta charset="utf-8"><title>' + filename + '</title>');
+
     var win = window.open('', '_blank');
     if (!win) {
       setStatus('Impossible d\'ouvrir la fenêtre. Vérifiez les popups bloquées.');
@@ -988,7 +1042,7 @@
       setTimeout(function() {
         win.focus();
         win.print();
-        setStatus('Fenêtre d\'impression ouverte. Choisissez "Enregistrer en PDF" dans la boîte de dialogue.');
+        setStatus('Fenêtre d\'impression ouverte → "Enregistrer en PDF" pour obtenir : ' + filename + '.pdf');
       }, 500);
     };
   }
