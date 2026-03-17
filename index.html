@@ -12,9 +12,12 @@
     h1 { margin: 0; font-size: 20px; }
     .version { font-size: 11px; color: #888; font-weight: 400; }
 
-    .tabs { display: flex; gap: 8px; margin: 6px 0 14px; flex-wrap: wrap; }
+    .tabs { display: flex; gap: 8px; margin: 6px 0 6px; flex-wrap: wrap; align-items: center; }
     .tab-btn { border: 1px solid #e1e1e1; border-radius: 999px; padding: 8px 12px; background: #fafafa; font-weight: 800; cursor: pointer; font-size: 13px; }
     .tab-btn.active { background: #111; color: #fff; border-color: #111; }
+    .tabs-separator { flex: 1; }
+    .tab-btn-io { background: #eef5ee; border-color: #b8dab8; color: #1e6b1e; }
+    .tab-btn-io:hover { background: #d6f5d6; }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
@@ -86,9 +89,7 @@
       transform-origin: top left;
     }
 
-    /* Import/Export section */
-    .io-section { border: 1px solid #e1e1e1; border-radius: 12px; padding: 12px; background: #fff; margin-top: 12px; }
-    .io-section strong { font-size: 14px; }
+
   </style>
 </head>
 <body>
@@ -100,7 +101,12 @@
     <div class="tabs">
       <button class="tab-btn active" data-tab="tabEditor" type="button">Rédaction</button>
       <button class="tab-btn" data-tab="tabConfig" type="button">Logos &amp; polices</button>
+      <div class="tabs-separator"></div>
+      <button class="tab-btn tab-btn-io" id="btnExportJson" type="button">⬇ Exporter JSON</button>
+      <button class="tab-btn tab-btn-io" type="button" onclick="document.getElementById('importJsonInput').click()">⬆ Importer JSON</button>
+      <input id="importJsonInput" type="file" accept=".json,application/json" style="display:none;" />
     </div>
+    <div id="ioStatus" class="status" style="margin:0 0 8px;font-size:12px;"></div>
 
     <!-- TAB 1: Rédaction -->
     <div id="tabEditor" class="tab-panel active">
@@ -178,19 +184,6 @@
         <div class="small" style="margin-top:6px;">URL du site fixe : mediathequesdugolfe.bzh</div>
       </div>
 
-      <!-- Import / Export JSON -->
-      <div class="io-section">
-        <strong>Sauvegarde / Import des données</strong>
-        <div class="hint" style="margin-top:4px;">Exportez les champs dans un fichier JSON pour pouvoir les réimporter plus tard et modifier l'affiche.</div>
-        <div class="actions" style="margin-top:10px;">
-          <button class="success" id="btnExportJson" type="button">⬇ Exporter JSON</button>
-          <label style="margin:0;">
-            <button class="secondary" type="button" onclick="document.getElementById('importJsonInput').click()">⬆ Importer JSON</button>
-          </label>
-          <input id="importJsonInput" type="file" accept=".json,application/json" style="display:none;" />
-        </div>
-        <div id="ioStatus" class="status"></div>
-      </div>
     </div>
 
     <!-- TAB 2: Logos & polices -->
